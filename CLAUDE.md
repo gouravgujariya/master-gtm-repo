@@ -53,8 +53,9 @@ Optional: **`reddit-find`** to hear how buyers actually describe the pain (sharp
    (Apify for hiring, Serper for local, etc.) → review accounts.
 4. **Find decision-makers** — AgenticData (primary) → AI Ark → ColdIQ → review.
 5. **Verify emails** — OptimaVerifier (+ AI Ark catch-all rescue) → review.
-6. **Copy** — Eric's rules + the **company + persona** variant (subjects 2–3 words). Mine real buyer
-   phrases/objections with `reddit-find` for subject + situation lines → review/edit.
+6. **Copy** — choose a method: Eric's rules + **company+persona** variant (default), or the **Braun /
+   Poke-the-Bear** method (`skills/braun-copywriting` — illumination questions + 6-element structure).
+   Mine real buyer phrases/objections with `reddit-find`. Subjects 2–3 words → review/edit.
 7. **Draft to Plusvibe** — verified leads → **DRAFT** (a human hits Start).
 
 ---

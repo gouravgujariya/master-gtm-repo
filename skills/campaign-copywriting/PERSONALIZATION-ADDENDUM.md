@@ -28,3 +28,11 @@ niche lists, Eric's standard copy may be enough on its own — this variant is o
 ## Reference example
 `profiles/aforanalytic/campaigns/company-persona-variant.md` — 2 finished samples (recycler-ops owner and
 agency owner) with 2–3 word subjects.
+
+## Copy methods available (pick per campaign)
+Eric's rules always apply for formatting/deliverability. On top, choose a method:
+1. **Company + persona variant** (default, this file) — researched company line + role-matched angle.
+2. **Braun / Poke-the-Bear** (`skills/braun-copywriting`) — question-first: TRUTH → illumination question →
+   cost of inaction → third-party proof → curiosity → low-friction CTA. Great with `reddit-find` buyer voice.
+Both obey Eric's rules (short, no em dashes, 2–3 word subjects, one job/email). You can A/B the two methods.
+
