@@ -17,7 +17,8 @@
     "supabase-push-companies": "tsx scripts/supabase-push-companies.ts",
     "plusvibe-upload": "tsx scripts/plusvibe-upload.ts",
     "agenticdata-find": "tsx skills/agenticdata-contacts/scripts/agenticdata-find.ts",
-    "new-client": "tsx scripts/new-client.ts"
+    "new-client": "tsx scripts/new-client.ts",
+    "app": "tsx app/server.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
