@@ -42,7 +42,8 @@ function runJob(cmd: string, argv: string[]): Job {
   const id = `job-${++jobSeq}`;
   const job: Job = { id, cmd, status: "running", output: `$ npm run ${cmd} -- ${argv.join(" ")}\n`, code: null, started: Date.now() };
   jobs.set(id, job);
-  const child = spawn("npm", ["run", cmd, "--", ...argv], { cwd: ROOT, env: process.env });
+  // --silent hides npm's own boilerplate (the "> script" echo + warnings) so users see just the real output
+  const child = spawn("npm", ["--silent", "run", cmd, "--", ...argv], { cwd: ROOT, env: process.env });
   const onData = (d: Buffer) => { job.output += d.toString(); };
   child.stdout.on("data", onData);
   child.stderr.on("data", onData);

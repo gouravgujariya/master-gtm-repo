@@ -179,8 +179,10 @@ async function loadClients(sel){
 }
 async function newClient(){
   const name = prompt('New client name (e.g. Acme Co):'); if(!name) return;
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const r = await hf('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd:'new-client',args:{name}})}).then(r=>r.json());
-  poll(r.jobId,'new'); setTimeout(()=>loadClients(name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')), 2500);
+  poll(r.jobId,'new');
+  setTimeout(async ()=>{ await loadClients(slug); onClient(); $('console').textContent = `✅ Client "${name}" created and selected.\n\nNext: set the Persona + seed domains above, then click "Run source".`; }, 2600);
 }
 function onClient(){ updatePaths(); loadData(); }
 function updatePaths(){ const c=ctx(); $('paths').textContent = c.client ? paths(c).verified : ''; }
