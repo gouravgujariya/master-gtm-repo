@@ -1,6 +1,28 @@
 # Campaign Workflow Rules (finalized)
 
-These three rules are the operating contract for the master GTM repo. They override convenience.
+These rules are the operating contract for the master GTM repo. They override convenience.
+**Entry point:** when the user says "GTM" (or `/gtm`), run the orchestration in `CLAUDE.md`.
+
+## 0. The order — inputs → stack → research → STRATEGY MENU → execute
+1. **Collect inputs first** (website, onboarding questionnaire, call transcripts, docs) → `profiles/<client>/inputs/`.
+2. **Confirm the GTM stack** — customize the tooling per client; build a script for any tool that has none
+   (from its API docs), keeping the strategy identical (see rule 4).
+3. **Research → ICP** (confirm).
+4. **Show the campaign angle menu** (`docs/campaign-angles.md`) and get the user's pick — including any
+   angle the client already has — BEFORE sourcing anything (see rule 5).
+5. Then execute source → find → verify → copy → draft, confirming at each gate.
+
+## 4. Stack is customizable — build scripts for new tools (strategy stays fixed)
+The STACK is per-user; the STRATEGY is Eric's and constant. If the user uses a GTM tool this repo has no
+script for, **create one**: get its API docs + key, write a script in the existing pattern, add the `.env`
+key + npm alias + `references/<tool>-api.md`. Never change the strategy to fit a tool — wire the tool to fit
+the strategy.
+
+## 5. Always show the strategy menu; support the client's own angles
+Never source before presenting `docs/campaign-angles.md` and getting the user's chosen angle(s). If the
+client has their own angle or existing GTM strategy, build a campaign plan around it and run it alongside
+the standard ones — and append it to `docs/campaign-angles.md` so it's reusable. Users may add new angles to
+test variations.
 
 ## 1. Confirmation gates — real campaigns run STEP BY STEP
 
