@@ -1,0 +1,27 @@
+{
+  "name": "krishna-gtm-repo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cold-outbound GTM system — scripts for sourcing, verification, and campaign ops.",
+  "scripts": {
+    "verify-emails": "tsx skills/agenticdata-contacts/scripts/verify-emails.ts",
+    "check-credits": "tsx skills/agenticdata-contacts/scripts/verify-emails.ts --credits",
+    "select-contacts": "tsx skills/agenticdata-contacts/scripts/select-contacts.ts",
+    "ai-ark": "tsx skills/agenticdata-contacts/scripts/ai-ark.ts",
+    "coldiq": "tsx skills/agenticdata-contacts/scripts/coldiq-find.ts",
+    "bulk-list": "tsx skills/bulk-list-builder/scripts/query.ts",
+    "supabase-sample": "tsx scripts/supabase-sample.ts",
+    "supabase-upload": "tsx scripts/supabase-upload.ts",
+    "supabase-push": "tsx scripts/supabase-push-contacts.ts",
+    "supabase-push-companies": "tsx scripts/supabase-push-companies.ts",
+    "plusvibe-upload": "tsx scripts/plusvibe-upload.ts",
+    "agenticdata-find": "tsx skills/agenticdata-contacts/scripts/agenticdata-find.ts",
+    "new-client": "tsx scripts/new-client.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

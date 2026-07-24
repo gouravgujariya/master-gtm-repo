@@ -1,0 +1,21 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Client data (private) — keep the template + README, exclude real client folders
+profiles/*
+!profiles/README.md
+!profiles/_TEMPLATE-client/
+
+# Bulk data — too big for GitHub (>100MB files). Shared out-of-band. See docs/sharing-and-github.md
+Common Outbound Lists/
+
+# Node / build
+node_modules/
+dist/
+*.log
+
+# OS
+.DS_Store
+.claude-flow/

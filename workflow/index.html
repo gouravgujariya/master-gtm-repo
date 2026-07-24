@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTM Workflow — Strategy + Engine</title>
+<meta name="description" content="The complete cold-outbound GTM workflow, start to finish — strategy phases and the technical engine, as a flowchart.">
+</head>
+<body>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f7f9fc; --ink:#141a22; --muted:#5a6675;
+    --line:#dce2ea; --line-strong:#c4ccd8; --accent:#3b60e4; --accent-soft:#e7ecfd;
+    --strategy:#b8791b; --infra:#5b6b7a; --data:#0e8c7f; --send:#6a4fd6; --measure:#c0455f;
+    --go:#1f9d5c; --hold:#c58a1a; --stop:#cf4a54;
+    --radius:14px; --maxw:1120px;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Helvetica Neue",Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d1117; --panel:#161d27; --panel-2:#111823; --ink:#e7ecf3; --muted:#93a0b2;
+      --line:#242e3b; --line-strong:#33404f; --accent:#7d97ff; --accent-soft:#1b2540;
+      --strategy:#d8a24a; --infra:#8a99a9; --data:#3bb8a6; --send:#a394f0; --measure:#e8788a;
+      --go:#3fca82; --hold:#e0ad4c; --stop:#ec6b74;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f7f9fc; --ink:#141a22; --muted:#5a6675;
+    --line:#dce2ea; --line-strong:#c4ccd8; --accent:#3b60e4; --accent-soft:#e7ecfd;
+    --strategy:#b8791b; --infra:#5b6b7a; --data:#0e8c7f; --send:#6a4fd6; --measure:#c0455f;
+    --go:#1f9d5c; --hold:#c58a1a; --stop:#cf4a54;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d1117; --panel:#161d27; --panel-2:#111823; --ink:#e7ecf3; --muted:#93a0b2;
+    --line:#242e3b; --line-strong:#33404f; --accent:#7d97ff; --accent-soft:#1b2540;
+    --strategy:#d8a24a; --infra:#8a99a9; --data:#3bb8a6; --send:#a394f0; --measure:#e8788a;
+    --go:#3fca82; --hold:#e0ad4c; --stop:#ec6b74;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;padding:0 0 64px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:var(--accent)}
+
+  /* ---- header ---- */
+  header{padding:56px 0 30px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(30px,5vw,50px);line-height:1.03;letter-spacing:-.02em;font-weight:800;margin:14px 0 12px;text-wrap:balance}
+  .lede{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:64ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);
+    background:var(--panel);border-radius:999px;padding:5px 11px}
+  .toggle{position:fixed;top:16px;right:16px;z-index:9;font-family:var(--mono);font-size:12px;
+    background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:999px;
+    padding:7px 13px;cursor:pointer}
+  .toggle:hover{border-color:var(--accent)}
+  .toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---- legend ---- */
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:26px 0 8px}
+  .legend .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .legend h4{margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .badges{display:flex;flex-wrap:wrap;gap:6px}
+
+  .badge{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:7px;border:1px solid;white-space:nowrap;font-weight:600}
+  .b-mcp{color:var(--data);border-color:color-mix(in srgb,var(--data) 40%,transparent);background:color-mix(in srgb,var(--data) 12%,transparent)}
+  .b-script{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  .b-data{color:var(--strategy);border-color:color-mix(in srgb,var(--strategy) 45%,transparent);background:color-mix(in srgb,var(--strategy) 13%,transparent)}
+  .b-skill{color:var(--send);border-color:color-mix(in srgb,var(--send) 42%,transparent);background:color-mix(in srgb,var(--send) 12%,transparent)}
+
+  /* ---- phase ---- */
+  .phase{margin-top:34px}
+  .phase__head{display:flex;align-items:baseline;gap:14px;padding:14px 0 6px;border-top:2px solid var(--pc);position:sticky;top:0;background:var(--bg);z-index:2}
+  .phase__no{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--pc);letter-spacing:.05em}
+  .phase__title{font-size:clamp(20px,3vw,26px);font-weight:800;letter-spacing:-.01em;margin:0}
+  .phase__sub{color:var(--muted);margin:2px 0 0;font-size:14.5px}
+
+  .steps{margin-top:12px}
+  .step{display:grid;grid-template-columns:34px 1fr;gap:16px}
+  .rail{display:flex;flex-direction:column;align-items:center}
+  .dot{width:15px;height:15px;border-radius:50%;background:var(--panel);border:3px solid var(--pc);margin-top:6px;flex:0 0 auto}
+  .rail .stem{flex:1;width:2px;background:var(--line-strong);margin:4px 0}
+  .step:last-child .stem{background:linear-gradient(var(--line-strong),transparent)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+  .card__t{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 6px}
+  .card__t h3{font-size:16.5px;margin:0;font-weight:750;letter-spacing:-.01em}
+  .step__id{font-family:var(--mono);font-size:12px;color:var(--pc);font-weight:700}
+  .card p{margin:0 0 10px;color:var(--muted);font-size:14.5px}
+  .card p:last-child{margin-bottom:0}
+  .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+
+  /* ---- waterfall chip flow ---- */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:10px 0 2px;padding:10px 12px;
+    background:var(--panel-2);border:1px dashed var(--line-strong);border-radius:10px}
+  .flow .lbl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);align-self:center;margin-right:2px}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line-strong);
+    border-radius:8px;padding:5px 9px;font-size:13px;font-weight:600}
+  .chip .n{font-family:var(--mono);font-size:10.5px;font-weight:700;color:#fff;background:var(--pc);
+    border-radius:5px;padding:1px 5px}
+  .arrow{align-self:center;color:var(--muted);font-weight:700}
+  .note{font-size:12.5px;color:var(--muted);font-style:italic;align-self:center;margin-left:2px}
+
+  /* ---- verify gate ---- */
+  .gate{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin:10px 0 2px;
+    padding:12px;background:var(--panel-2);border:1px solid var(--line-strong);border-radius:10px}
+  .gate__in{font-weight:750;font-size:14px;text-align:center;padding:10px 12px;border-radius:9px;
+    background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--ink)}
+  .gate__outs{display:flex;flex-direction:column;gap:7px}
+  .out{display:flex;align-items:center;gap:9px;font-size:13.5px;padding:6px 10px;border-radius:8px;background:var(--panel);border:1px solid var(--line)}
+  .out b{font-family:var(--mono);font-size:11.5px;padding:2px 7px;border-radius:6px;color:#fff;flex:0 0 auto}
+  .out--go b{background:var(--go)} .out--hold b{background:var(--hold)} .out--stop b{background:var(--stop)}
+
+  /* ---- parallel infra callout ---- */
+  .parallel{border-left:3px solid var(--infra)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--infra);border:1px solid color-mix(in srgb,var(--infra) 45%,transparent);border-radius:999px;padding:2px 9px;margin-bottom:8px}
+
+  /* ---- data layer + principles ---- */
+  .slab{margin-top:40px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+  .slab h3{margin:0 0 4px;font-size:18px;font-weight:800;letter-spacing:-.01em}
+  .slab .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .mini{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  .mini h5{margin:0 0 4px;font-size:13.5px;font-weight:750}
+  .mini p{margin:0;font-size:13px;color:var(--muted)}
+  .principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}
+  .principles li{list-style:none;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+    padding:11px 13px;font-size:13.5px;display:flex;gap:9px;align-items:flex-start}
+  .principles .k{color:var(--accent);font-weight:800;font-family:var(--mono);font-size:12px;flex:0 0 auto;margin-top:1px}
+  ul{padding:0;margin:0}
+
+  footer{margin-top:40px;color:var(--muted);font-size:13px;text-align:center;font-family:var(--mono)}
+  @media (max-width:560px){
+    .step{grid-template-columns:24px 1fr;gap:11px}
+    .gate{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .card{transition:border-color .15s ease, transform .15s ease}
+    .card:hover{border-color:var(--line-strong)}
+  }
+</style>
+
+<button class="toggle" id="themeBtn" aria-label="Toggle light or dark theme">◑ theme</button>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Master GTM Repo · Cold Outbound Engine</div>
+    <h1>The complete GTM workflow, start to finish</h1>
+    <p class="lede">One flow from a blank client to booked replies — the <strong>strategy</strong> that decides who to talk to and why, and the <strong>engine</strong> that sources, verifies, writes, sends, and measures. Every step names the tool that runs it.</p>
+    <div class="meta">
+      <span class="tag">4 phases + parallel infra</span>
+      <span class="tag">bulk-data-first</span>
+      <span class="tag">verify-before-send</span>
+      <span class="tag">always DRAFT</span>
+    </div>
+  </header>
+
+  <section class="legend" aria-label="How to read the tool badges">
+    <div class="card">
+      <h4>Tool badge = how a step runs</h4>
+      <div class="badges">
+        <span class="badge b-mcp">AgenticData · MCP</span>
+        <span class="badge b-script">npm script · API</span>
+        <span class="badge b-data">bulk CSV · local</span>
+        <span class="badge b-skill">strategy skill</span>
+      </div>
+    </div>
+    <div class="card">
+      <h4>Phase colours</h4>
+      <div class="badges">
+        <span class="badge" style="color:var(--strategy);border-color:var(--strategy)">01 Strategy</span>
+        <span class="badge" style="color:var(--data);border-color:var(--data)">02 List</span>
+        <span class="badge" style="color:var(--send);border-color:var(--send)">03 Copy &amp; Send</span>
+        <span class="badge" style="color:var(--measure);border-color:var(--measure)">04 Measure</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 01 -->
+  <section class="phase" style="--pc:var(--strategy)">
+    <div class="phase__head">
+      <span class="phase__no">PHASE 01</span>
+      <div>
+        <h2 class="phase__title">Strategy — decide who &amp; why</h2>
+        <p class="phase__sub">Orchestrated by <span class="badge b-skill">cold-email-kickoff</span> · nothing gets sent until this is done.</p>
+      </div>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">1.1</span><h3>Onboard the client → ICP</h3></div>
+          <p>Deep-research the client's website and every sub-page, pull the <strong>case studies / existing customers</strong>, and combine with the client questionnaire. Produces <code>client-profile.yaml</code> (ICP, offer, stack).</p>
+          <div class="tools">
+            <span class="badge b-skill">icp-onboarding</span>
+            <span class="badge b-mcp">FireCrawl · MCP</span>
+            <span class="badge b-skill">questionnaire</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">1.2</span><h3>Pick the offer / lead magnet</h3></div>
+          <p>Choose the free hook the emails lead with — the reason a stranger replies. Maps to one value-prop category: make money, save time, save money, or reduce risk.</p>
+          <div class="tools"><span class="badge b-skill">lead-magnet-brainstorm</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">1.3</span><h3>Build the campaign strategy</h3></div>
+          <p>Generate 15–25 campaign angles, ordered broad → niche, each with a targeting filter, an AI-personalization approach, and a value prop. Three are always included:</p>
+          <div class="flow">
+            <span class="lbl">always</span>
+            <span class="chip">Creative Ideas</span><span class="arrow">·</span>
+            <span class="chip">New Hire</span><span class="arrow">·</span>
+            <span class="chip">Lookalike</span>
+            <span class="note">pick ONE to launch first — usually Creative or Lookalike</span>
+          </div>
+          <div class="tools"><span class="badge b-skill">campaign-strategy</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- parallel infra -->
+    <div class="step">
+      <div class="rail"><span class="dot" style="border-color:var(--infra)"></span><span class="stem"></span></div>
+      <div class="card parallel">
+        <span class="pill">Runs in parallel · ~2–3 weeks lead time</span>
+        <div class="card__t"><span class="step__id" style="color:var(--infra)">∥</span><h3>Stand up the sending infrastructure</h3></div>
+        <p>Buy domains, create inboxes, warm them, and export to the sender. This runs <em>alongside</em> strategy because warmup takes two weeks — start early.</p>
+        <div class="flow" style="border-color:var(--infra)">
+          <span class="chip"><span class="n" style="background:var(--infra)">1</span>Porkbun · domains</span><span class="arrow">→</span>
+          <span class="chip"><span class="n" style="background:var(--infra)">2</span>Inboxkit / Maildoso · inboxes + warmup</span><span class="arrow">→</span>
+          <span class="chip"><span class="n" style="background:var(--infra)">3</span>Export → Plusvibe</span>
+          <span class="note">2-week warmup · 30 emails/inbox/day</span>
+        </div>
+        <div class="tools"><span class="badge b-skill">inbox-infrastructure</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 02 -->
+  <section class="phase" style="--pc:var(--data)">
+    <div class="phase__head">
+      <span class="phase__no">PHASE 02</span>
+      <div>
+        <h2 class="phase__title">Build the list — verified &amp; sendable</h2>
+        <p class="phase__sub">Turn one campaign angle into a clean contact list. Waterfalls stop at the first hit; nothing unverified passes.</p>
+      </div>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">2.1</span><h3>Source the companies</h3></div>
+          <p>Bulk data first — we already own ~12.3M US businesses and ~900K SaaS companies locally. Go live only if that isn't enough, adapting the tool to the campaign.</p>
+          <div class="flow">
+            <span class="lbl">waterfall</span>
+            <span class="chip"><span class="n">1</span>Bulk 12M / 900K CSV</span><span class="arrow">→</span>
+            <span class="chip"><span class="n">2</span>AI Ark · lookalikes</span><span class="arrow">→</span>
+            <span class="chip"><span class="n">3</span>Apify · hiring/LinkedIn</span><span class="arrow">→</span>
+            <span class="chip"><span class="n">4</span>Serper · local</span>
+          </div>
+          <div class="tools">
+            <span class="badge b-data">bulk-list</span>
+            <span class="badge b-script">ai-ark</span>
+            <span class="badge b-mcp">Apify · MCP</span>
+            <span class="badge b-script">serper</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">2.2</span><h3>Find the decision-makers + emails</h3></div>
+          <p>For each company, find the right person and their email. Waterfall by cost — stop as soon as one returns a usable email; escalate to ColdIQ only when stuck.</p>
+          <div class="flow">
+            <span class="lbl">waterfall</span>
+            <span class="chip"><span class="n">1</span>AgenticData</span><span class="arrow">→</span>
+            <span class="chip"><span class="n">2</span>AI Ark</span><span class="arrow">→</span>
+            <span class="chip"><span class="n">3</span>ColdIQ · last resort</span>
+            <span class="note">then rank by title + seniority</span>
+          </div>
+          <div class="tools">
+            <span class="badge b-mcp">AgenticData · MCP</span>
+            <span class="badge b-script">ai-ark</span>
+            <span class="badge b-script">coldiq</span>
+            <span class="badge b-script">select-contacts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">2.3</span><h3>Verify every email — the gate</h3></div>
+          <p>Deliverability is the priority. <strong>Every</strong> email runs through OptimaVerifier before it can be sent.</p>
+          <div class="gate">
+            <div class="gate__in">OptimaVerifier<br><span style="font-weight:400;color:var(--muted);font-size:12px">every email</span></div>
+            <div class="gate__outs">
+              <span class="out out--go"><b>valid</b> send it</span>
+              <span class="out out--hold"><b>catch-all</b> cross-check with AI Ark → SMTP/valid keeps, else drop</span>
+              <span class="out out--stop"><b>invalid</b> drop</span>
+            </div>
+          </div>
+          <div class="tools">
+            <span class="badge b-script">verify-emails</span>
+            <span class="badge b-script">ai-ark --verify-catchall</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">2.4</span><h3>Grade the list before upload</h3></div>
+          <p>Score the list on verification coverage, duplicates, title diversity, and ICP fit. Fix or re-pull anything that grades poorly — a bad list wastes warmed inboxes.</p>
+          <div class="tools"><span class="badge b-skill">list-quality-scorecard</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PHASE 03 -->
+  <section class="phase" style="--pc:var(--send)">
+    <div class="phase__head">
+      <span class="phase__no">PHASE 03</span>
+      <div>
+        <h2 class="phase__title">Copy &amp; launch</h2>
+        <p class="phase__sub">Write copy that earns replies. Upload as a draft — a human always hits Start.</p>
+      </div>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">3.1</span><h3>Write the sequence</h3></div>
+          <p>Situation → value + proof → low-effort CTA. A 4-email sequence that rotates the value-prop angle, 50–90 words each, research as the personalization. QA for deliverability, then serialize to <code>variants.yaml</code>.</p>
+          <div class="tools">
+            <span class="badge b-skill">campaign-copywriting</span>
+            <span class="badge b-skill">email-spintax</span>
+            <span class="badge b-skill">spam-word-checker</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">3.2</span><h3>Upload to the sender — as DRAFT</h3></div>
+          <p>Push verified leads + copy into Plusvibe, auto-selecting the healthiest inboxes (least-recently-used). The campaign lands in <strong>DRAFT</strong> — you review in the UI and hit Start yourself.</p>
+          <div class="tools">
+            <span class="badge b-script">campaign-upload</span>
+            <span class="badge b-script">Plusvibe / Smartlead</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PHASE 04 -->
+  <section class="phase" style="--pc:var(--measure)">
+    <div class="phase__head">
+      <span class="phase__no">PHASE 04</span>
+      <div>
+        <h2 class="phase__title">Measure &amp; iterate</h2>
+        <p class="phase__sub">Judge on positive replies, not opens. Kill losers, scale winners, keep a weekly rhythm.</p>
+      </div>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">4.1</span><h3>Wait 21 days, then score positive replies</h3></div>
+          <p>The north-star metric is <strong>positive replies ÷ total sent</strong> — not raw reply rate. Reply to interested prospects within seconds; they convert far better.</p>
+          <div class="tools"><span class="badge b-skill">positive-reply-scoring</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot"></span><span class="stem"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">4.2</span><h3>Design the next experiment</h3></div>
+          <p>Change one variable at a time — list <em>or</em> copy, not both — so you learn what actually moved the number. Winners (≥2× baseline) scale; losers get killed.</p>
+          <div class="tools"><span class="badge b-skill">experiment-design</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="rail"><span class="dot" style="border-color:var(--measure)"></span></div>
+        <div class="card">
+          <div class="card__t"><span class="step__id">4.3</span><h3>Keep the weekly rhythm</h3></div>
+          <p><strong>Mon</strong> deliverability audit · <strong>Wed</strong> positive-reply sweep · <strong>Fri</strong> retrospectives on any campaign hitting day 21. Consistency is what separates the top 1%.</p>
+          <div class="tools"><span class="badge b-skill">cold-email-weekly-rhythm</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DATA LAYER -->
+  <div class="slab">
+    <h3>Underneath it all — the data layer</h3>
+    <p class="sub">Every company, contact, campaign, send, and reply is stored once and reused across the loop.</p>
+    <div class="grid3">
+      <div class="mini"><h5>Supabase</h5><p>System of record: companies · contacts (with verify status) · campaigns · sends · replies. Multi-client (agency) scoped.</p></div>
+      <div class="mini"><h5>Bulk lists</h5><p>~12.3M US businesses + ~900K SaaS companies, queried locally first — free and instant.</p></div>
+      <div class="mini"><h5>Live tools</h5><p>AgenticData &amp; Apify &amp; FireCrawl via MCP; AI Ark, ColdIQ, OptimaVerifier, Serper, Plusvibe via API keys.</p></div>
+    </div>
+  </div>
+
+  <!-- PRINCIPLES -->
+  <div class="slab">
+    <h3>Non-negotiable principles</h3>
+    <p class="sub">The rules every campaign obeys, regardless of tooling.</p>
+    <ul class="principles">
+      <li><span class="k">1%</span><span>A healthy domain sustains ≥1% reply rate after 200 sends.</span></li>
+      <li><span class="k">★</span><span>Positive reply rate is the north star — right replies, not just replies.</span></li>
+      <li><span class="k">✎</span><span>Always upload as DRAFT. A human hits Start.</span></li>
+      <li><span class="k">⏱</span><span>2-week warmup before sending · 21-day window before judging.</span></li>
+      <li><span class="k">✓</span><span>Never send an unverified email. OptimaVerifier is the gate.</span></li>
+      <li><span class="k">⚖</span><span>B2B only · honor unsubscribes · real physical address.</span></li>
+    </ul>
+  </div>
+
+  <footer>Master GTM Repo · workflow map · strategy + engine, end to end</footer>
+</div>
+
+<script>
+  (function(){
+    var btn=document.getElementById('themeBtn');
+    var root=document.documentElement;
+    btn.addEventListener('click',function(){
+      var cur=root.getAttribute('data-theme');
+      if(!cur){ cur = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light'; }
+      root.setAttribute('data-theme', cur==='dark'?'light':'dark');
+    });
+  })();
+</script>
+</body>
+</html>

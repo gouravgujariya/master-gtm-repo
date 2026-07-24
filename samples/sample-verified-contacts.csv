@@ -1,0 +1,5 @@
+email,first_name,last_name,company_name,company_domain,title,linkedin_url,email_status,sendable,find_source,verify_note
+sdoyle@figma.com,Shannon,Doyle,Figma,figma.com,Enterprise Growth,https://www.linkedin.com/in/shannondoyle913,valid,yes,ai-ark,SMTP/VALID
+nate.parry@gusto.com,Nathan,Parry,Gusto,gusto.com,Business Analytics,https://www.linkedin.com/in/nathanparry,valid,yes,coldiq,verified
+nithin@stripe.com,Nithin,Chandy,Stripe,stripe.com,Software Engineer,https://www.linkedin.com/in/nithinchandy,catch-all,no,agenticdata,catch-all dropped (AI Ark CATCH_ALL)
+huashuai@stripe.com,Huashuai,Qu,Stripe,stripe.com,Data Scientist,https://www.linkedin.com/in/huashuai,invalid,no,agenticdata,dropped invalid
