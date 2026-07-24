@@ -12,6 +12,7 @@ This file is the single source of truth for the provider options + defaults. Ski
 | Find companies + **lookalikes** | **AI Ark** | Apify | `ai-ark-api.md` | API key |
 | Scraping (hiring, LinkedIn, reviews…) | **Apify** | Serper.dev (local) | `apify-api.md` | **MCP** + API |
 | Tech-stack detection (qualifier) | **TechSight** (free, no key) | — | `techsight-cli.md` | Python CLI |
+| Buyer-language research (copy/ICP) | **reddit-find** (free) | — | `reddit-find-cli.md` | Python CLI |
 | Find decision-makers + emails | **AgenticData** → **AI Ark** → **ColdIQ** (last resort) | — | `agenticdata-api.md`, `ai-ark-api.md`, `coldiq-api.md` | MCP + API |
 | **Verify emails (mandatory gate)** | **OptimaVerifier** (every email) | catch-all cross-check → **AI Ark** (pending AI Ark API docs) | `optimaverifier-api.md`, `ai-ark-api.md` | API key |
 | Website fetch / research | **FireCrawl** | Open Web Ninja (news, fallback) | `firecrawl-api.md` | **MCP** + API |

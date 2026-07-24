@@ -37,6 +37,8 @@ sending / inboxes / domains**. Compare against `docs/stack-selector.md`.
 FireCrawl-research the website + read everything in `inputs/` → draft the ICP into `client-profile.yaml`
 (persona, industries, geography, value prop, lookalike seed domains from their case studies) → **show it and
 get confirmation / edits.**
+Optional: **`reddit-find`** to hear how buyers actually describe the pain (sharpens ICP + copy) — see
+`references/reddit-find-cli.md`.
 
 ### Step 2 — SHOW THE CAMPAIGN ANGLE MENU, then plan (CRITICAL — never skip)
 **Always present the full menu of campaign angles from `docs/campaign-angles.md`** (Eric's strategy set). Then:
@@ -51,7 +53,8 @@ get confirmation / edits.**
    (Apify for hiring, Serper for local, etc.) → review accounts.
 4. **Find decision-makers** — AgenticData (primary) → AI Ark → ColdIQ → review.
 5. **Verify emails** — OptimaVerifier (+ AI Ark catch-all rescue) → review.
-6. **Copy** — Eric's rules + the **company + persona** variant (subjects 2–3 words) → review/edit.
+6. **Copy** — Eric's rules + the **company + persona** variant (subjects 2–3 words). Mine real buyer
+   phrases/objections with `reddit-find` for subject + situation lines → review/edit.
 7. **Draft to Plusvibe** — verified leads → **DRAFT** (a human hits Start).
 
 ---
