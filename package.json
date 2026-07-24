@@ -18,9 +18,13 @@
     "plusvibe-upload": "tsx scripts/plusvibe-upload.ts",
     "agenticdata-find": "tsx skills/agenticdata-contacts/scripts/agenticdata-find.ts",
     "new-client": "tsx scripts/new-client.ts",
-    "app": "tsx app/server.ts"
+    "app": "tsx app/server.ts",
+    "start": "tsx app/server.ts"
   },
-  "devDependencies": {
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"

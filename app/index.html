@@ -57,9 +57,15 @@
   .status{display:flex;gap:6px;flex-wrap:wrap}
   .k{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid var(--line)}
   .k.on{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,transparent)} .k.off{color:var(--stop);border-color:color-mix(in srgb,var(--stop) 40%,transparent)}
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:30}
+  .login{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;width:340px;text-align:center}
+  .login h1{font-size:20px;margin:0 0 4px}.login p{color:var(--muted);margin:0 0 18px;font-size:13px}
+  .login input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--lineS);background:var(--panel2);color:var(--ink);font-size:14px;margin-bottom:10px}
+  .login button{width:100%}.err{color:var(--stop);font-size:12.5px;min-height:16px;margin-top:8px}
 </style>
 </head>
 <body>
+<div id="gate" style="display:none"><form class="login" onsubmit="doLogin(event)"><h1>GTM Console</h1><p>Enter the team password.</p><input id="pw" type="password" autofocus placeholder="Password"><button type="submit">Enter</button><div class="err" id="lerr"></div></form></div>
 <header>
   <div class="brand">GTM<span>·</span>Console</div>
   <label class="mono muted" style="font-size:11px">CLIENT</label>
@@ -108,6 +114,8 @@
 
 <script>
 const $ = (id)=>document.getElementById(id);
+let KEY = sessionStorage.getItem('gtm_app_key')||'';
+const hf = (u,o={})=>{ o.headers = Object.assign({'x-app-key':KEY}, o.headers||{}); return fetch(u,o); };
 const ctx = ()=>({ client: $('client').value, slug: $('slug').value||'lookalike', persona: $('persona').value, segment: $('segment').value, market: $('market').value });
 const paths = (c)=>({
   companies:`profiles/${c.client}/lead-database/companies-${c.slug}.csv`,
@@ -117,9 +125,9 @@ const paths = (c)=>({
 });
 
 const STAGES = [
-  { n:'01', c:'var(--strategy)', key:'source', title:'Source companies', tool:'bulk-list', desc:'Query the local 12M/900K bulk data → companies, pushed to Supabase.',
-    fields:[['dataset','select',['saas','local']],['filter','text','industry/category'],['state','text','CA (local)'],['limit','text','50']],
-    build:(c,f)=>({cmd:'bulk-list',args:{dataset:f.dataset,[f.dataset==='local'?'category':'industry']:f.filter,state:f.state,limit:f.limit||50,out:paths(c).companies,push:true,client:c.client,segment:c.segment,market:c.market,source:'bulk-'+f.dataset}}) },
+  { n:'01', c:'var(--strategy)', key:'source', title:'Source companies', tool:'ai-ark (lookalike)', desc:'Find lookalike companies via AI Ark from seed domains (the client’s case-study customers). Pushed to Supabase.',
+    fields:[['seeds','text','seed domains, comma-separated'],['size','text','40']],
+    build:(c,f)=>({cmd:'ai-ark',args:{companies:true,lookalike:f.seeds,size:f.size||40,out:paths(c).companies,push:true,client:c.client,segment:c.segment,market:c.market,source:'ai-ark-lookalike'}}) },
   { n:'02', c:'var(--data)', key:'find', title:'Find decision-makers', tool:'agenticdata-find', desc:'AgenticData (primary) finds contacts + emails per company, persona-first.',
     fields:[['limit','text','40'],['target','text','12']],
     build:(c,f)=>({cmd:'agenticdata-find',args:{in:paths(c).companies,out:paths(c).contacts,title:c.persona,limit:f.limit||40,target:f.target||12}}) },
@@ -150,14 +158,14 @@ async function runStage(i){
   const c=ctx(); if(!c.client){ alert('Pick or create a client first.'); return; }
   const s=STAGES[i]; const {cmd,args}=s.build(c, fieldsOf(s));
   $('console').textContent = `Starting ${s.title}…`;
-  const r = await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd,args})}).then(r=>r.json());
+  const r = await hf('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd,args})}).then(r=>r.json());
   if(r.error){ $('console').textContent = 'Error: '+r.error; return; }
   poll(r.jobId, s.key);
 }
 function poll(jobId, key){
   clearInterval(polling);
   polling = setInterval(async ()=>{
-    const j = await fetch('/api/job/'+jobId).then(r=>r.json());
+    const j = await hf('/api/job/'+jobId).then(r=>r.json());
     $('console').textContent = j.output; $('console').scrollTop = $('console').scrollHeight;
     $('jobstat').textContent = j.status;
     if(j.status!=='running'){ clearInterval(polling); if(j.status==='done'){ loadData(); } }
@@ -165,13 +173,13 @@ function poll(jobId, key){
 }
 
 async function loadClients(sel){
-  const cs = await fetch('/api/clients').then(r=>r.json());
+  const cs = await hf('/api/clients').then(r=>r.json());
   $('client').innerHTML = '<option value="">— select client —</option>'+cs.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('');
   if(sel) $('client').value = sel;
 }
 async function newClient(){
   const name = prompt('New client name (e.g. Acme Co):'); if(!name) return;
-  const r = await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd:'new-client',args:{name}})}).then(r=>r.json());
+  const r = await hf('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd:'new-client',args:{name}})}).then(r=>r.json());
   poll(r.jobId,'new'); setTimeout(()=>loadClients(name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')), 2500);
 }
 function onClient(){ updatePaths(); loadData(); }
@@ -183,7 +191,7 @@ function setTab(t){ tab=t; $('tabC').className = t==='contacts'?'on':''; $('tabK
 async function loadData(){
   const c=ctx(); if(!c.client){ return; }
   $('data').innerHTML = '<span class="muted">Loading…</span>';
-  const rows = await fetch(`/api/${tab}?client=${c.client}`).then(r=>r.json());
+  const rows = await hf(`/api/${tab}?client=${c.client}`).then(r=>r.json());
   if(rows.error){ $('data').innerHTML = `<span class="muted">${rows.error}</span>`; return; }
   if(!rows.length){ $('data').innerHTML = `<span class="muted">No ${tab} yet for ${c.client}. Run the pipeline.</span>`; return; }
   const cols = Object.keys(rows[0]);
@@ -195,12 +203,24 @@ async function loadData(){
     }).join('')}</tr>`).join('')+`</tbody></table>`;
 }
 async function loadEnv(){
-  const s = await fetch('/api/status').then(r=>r.json());
+  const s = await hf('/api/status').then(r=>r.json());
   $('env').innerHTML = s.env.map(e=>`<span class="k ${e.present?'on':'off'}">${e.key.replace('_API_KEY','').replace('_KEY','').replace('SUPABASE_SERVICE_ROLE','SUPABASE')} ${e.present?'✓':'—'}</span>`).join('');
 }
 function toggleTheme(){ const r=document.documentElement; const cur=r.getAttribute('data-theme')|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); r.setAttribute('data-theme', cur==='dark'?'light':'dark'); }
 
-renderStages(); loadClients(); loadEnv();
+async function boot(){ renderStages(); await loadClients(); loadEnv(); }
+async function checkAuth(){
+  const r = await hf('/api/status');
+  if(r.status===401){ $('gate').style.display='flex'; return; }
+  $('gate').style.display='none'; boot();
+}
+async function doLogin(e){
+  e.preventDefault(); KEY=$('pw').value; sessionStorage.setItem('gtm_app_key',KEY);
+  const r = await hf('/api/status');
+  if(r.status===401){ $('lerr').textContent='Wrong password.'; return; }
+  $('gate').style.display='none'; boot();
+}
+checkAuth();
 </script>
 </body>
 </html>

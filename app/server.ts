@@ -7,14 +7,16 @@
  */
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnv } from "../lib/env.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ENV = loadEnv();
-const PORT = 4317;
+const PORT = Number(process.env.PORT) || 4317;
+// Shared team password. If set (cloud), /api/* requires the x-app-key header. If unset (local), open.
+const AUTH = ENV.APP_PASSWORD || process.env.APP_PASSWORD || "";
 
 // ---- Supabase read helper ----
 async function sb(path: string): Promise<any> {
@@ -68,6 +70,17 @@ function listClients(): { slug: string; name: string; stage: string }[] {
   });
 }
 
+// merge local client folders with distinct clients already in Supabase (survive cloud redeploys)
+async function allClients() {
+  const map = new Map(listClients().map((c) => [c.slug, c]));
+  try {
+    const [ct, co] = await Promise.all([sb("contacts?select=client"), sb("companies?select=client")]);
+    const extra = new Set([...(Array.isArray(ct) ? ct : []), ...(Array.isArray(co) ? co : [])].map((r: any) => r.client).filter(Boolean));
+    for (const slug of extra) if (!map.has(slug)) map.set(slug, { slug, name: slug, stage: "" });
+  } catch { /* Supabase optional */ }
+  return [...map.values()];
+}
+
 function envStatus() {
   const keys = ["ADATA_API_KEY", "AI_ARK_API_KEY", "COLDIQ_API_KEY", "OPTIMAVERIFIER_API_KEY", "APIFY_TOKEN", "SERPER_API_KEY", "FIRECRAWL_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "PLUSVIBE_API_KEY"];
   return keys.map((k) => ({ key: k, present: !!(ENV[k] && ENV[k].length) }));
@@ -91,8 +104,12 @@ const server = createServer(async (req, res) => {
       res.writeHead(200, { "Content-Type": "text/html" });
       return res.end(readFileSync(resolve(ROOT, "workflow/index.html")));
     }
-    if (p === "/api/status") return json(res, 200, { env: envStatus(), clients: listClients().length });
-    if (p === "/api/clients") return json(res, 200, listClients());
+    // shared-password gate for all /api routes (only when APP_PASSWORD is set, i.e. cloud)
+    if (p.startsWith("/api/") && AUTH) {
+      if ((req.headers["x-app-key"] || "") !== AUTH) return json(res, 401, { error: "unauthorized" });
+    }
+    if (p === "/api/status") return json(res, 200, { env: envStatus(), clients: listClients().length, authRequired: !!AUTH });
+    if (p === "/api/clients") return json(res, 200, await allClients());
     if (p === "/api/companies") return json(res, 200, await sb(`companies?select=company_name,domain,industry,company_size,location,list_source&client=eq.${u.searchParams.get("client")}&order=created_at.desc&limit=200`));
     if (p === "/api/contacts") return json(res, 200, await sb(`contacts?select=email,first_name,last_name,company_name,title,email_status,sendable,find_source,list_source&client=eq.${u.searchParams.get("client")}&order=created_at.desc&limit=200`));
 
@@ -103,6 +120,13 @@ const server = createServer(async (req, res) => {
       for (const [k, v] of Object.entries(body.args || {})) {
         if (v === true) argv.push(`--${k}`);
         else if (v !== "" && v != null) argv.push(`--${k}=${v}`);
+        // ensure any referenced folder exists (cloud filesystem starts empty)
+        if (typeof v === "string" && v.includes("/")) { try { mkdirSync(resolve(ROOT, dirname(v)), { recursive: true }); } catch {} }
+      }
+      // Draft stage needs a sequence file — drop in the default if the client has none yet.
+      if (body.cmd === "plusvibe-upload" && body.args?.sequence) {
+        const seqPath = resolve(ROOT, body.args.sequence);
+        if (!existsSync(seqPath)) { try { mkdirSync(dirname(seqPath), { recursive: true }); writeFileSync(seqPath, readFileSync(resolve(ROOT, "app/default-sequence.json"))); } catch {} }
       }
       const job = runJob(body.cmd, argv);
       return json(res, 200, { jobId: job.id });

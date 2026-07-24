@@ -13,6 +13,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { requireKey, loadEnv, args, parseCsv, toCsv, sleep } from "../../../lib/env.js";
+import { upsert, slug, TableMissingError, explainMissing } from "../../../lib/supabase.js";
 
 const BASE = "https://api.ai-ark.com/api/developer-portal";
 const KEY = requireKey("AI_ARK_API_KEY");
@@ -199,7 +200,19 @@ async function main() {
     const look = String(a.lookalike || "").split(",").map((s) => s.trim()).filter(Boolean);
     const companies = await searchCompanies(look, Number(a.size || 25));
     if (a.out) { writeFileSync(String(a.out), toCsv(companies)); console.log(`Wrote ${a.out}.`); }
-    else console.log(JSON.stringify(companies.slice(0, 10), null, 2));
+    if (a.push) {
+      const client = slug(String(a.client || ""));
+      if (!client) { console.error('--push needs --client="..."'); process.exit(1); }
+      const recs = companies.map((c: any) => ({
+        client, segment: slug(String(a.segment || "")) || null, target_market: slug(String(a.market || "")) || null,
+        list_source: slug(String(a.source || "ai-ark-lookalike")) || null,
+        company_name: c.company_name || null, domain: (c.domain || "").toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "") || null,
+        industry: c.industry || null, company_size: c.size || null, location: c.location || null,
+      })).filter((r: any) => r.domain);
+      try { const n = await upsert("companies", recs, "client,domain"); console.log(`✓ Pushed ${n} companies to Supabase (client "${client}").`); }
+      catch (e) { if (e instanceof TableMissingError) explainMissing("companies", "supabase/schema-companies.sql"); else console.error("\n" + (e as Error).message); }
+    }
+    if (!a.out && !a.push) console.log(JSON.stringify(companies.slice(0, 10), null, 2));
     return;
   }
   console.error("Modes: --credits | --find --first --last --domain | --verify-catchall --in --out | --companies --lookalike=a.com,b.com [--out]");

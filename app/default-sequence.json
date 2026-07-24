@@ -1,0 +1,30 @@
+{
+  "campaign_name": "GTM campaign (draft)",
+  "schedule": {
+    "daily_limit": 30,
+    "daily_limit_new_lead": 20,
+    "start_date": "2026-08-01",
+    "end_date": "",
+    "days": { "1": true, "2": true, "3": true, "4": true, "5": true },
+    "timezone": "America/New_York",
+    "timing": { "from": "09:00", "to": "17:00" }
+  },
+  "sequences": [
+    {
+      "step": 1,
+      "wait_time": 3,
+      "variations": [
+        { "variation": "A", "subject": "quick question", "name": "",
+          "body": "<div>Hi {{first_name}},<br><br>Saw what {{company_name}} is working on. We help teams like yours turn scattered data into clear dashboards, usually live within a couple of weeks.<br><br>Open to a quick look at what that could show for {{company_name}}?<br><br>Best</div>" }
+      ]
+    },
+    {
+      "step": 2,
+      "wait_time": 1,
+      "variations": [
+        { "variation": "A", "subject": "", "name": "",
+          "body": "<div>Hi {{first_name}},<br><br>One number most teams track wrong until they see it on a dashboard: true cost per customer. Want a couple of examples built for companies like {{company_name}}?<br><br>Best</div>" }
+      ]
+    }
+  ]
+}
