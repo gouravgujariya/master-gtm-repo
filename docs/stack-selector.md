@@ -11,8 +11,8 @@ This file is the single source of truth for the provider options + defaults. Ski
 | SaaS/software (source) | **Bulk 900K CSV** (first) | AI Ark → Apify | `bulk-list-builder`, `ai-ark-api.md`, `apify-api.md` | local / API |
 | Find companies + **lookalikes** | **AI Ark** | Apify | `ai-ark-api.md` | API key |
 | Scraping (hiring, LinkedIn, reviews…) | **Apify** | Serper.dev (local) | `apify-api.md` | **MCP** + API |
-| Tech-stack detection (qualifier) | **TechSight** (free, no key) | — | `techsight-cli.md` | Python CLI |
-| Buyer-language research (copy/ICP) | **reddit-find** (free) | — | `reddit-find-cli.md` | Python CLI |
+| Tech-stack targeting | **AI Ark `technologies` filter** (source by tech) | **TechSight** (free) — fallback: detect/confirm on any list | `ai-ark-api.md`, `techsight-cli.md` | API + Python CLI |
+| Buyer-language research (copy/ICP) | **reddit-find** (free) — feed into research + copy | — | `reddit-find-cli.md` | Python CLI |
 | Find decision-makers + emails | **AgenticData** → **AI Ark** → **ColdIQ** (last resort) | — | `agenticdata-api.md`, `ai-ark-api.md`, `coldiq-api.md` | MCP + API |
 | **Verify emails (mandatory gate)** | **OptimaVerifier** (every email) | catch-all cross-check → **AI Ark** (pending AI Ark API docs) | `optimaverifier-api.md`, `ai-ark-api.md` | API key |
 | Website fetch / research | **FireCrawl** | Open Web Ninja (news, fallback) | `firecrawl-api.md` | **MCP** + API |

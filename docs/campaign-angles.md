@@ -11,9 +11,9 @@ and add their own. The **strategy is Eric's and stays the same**; this list is a
 ## More angles (pick per client / test variations)
 - **Competitor engagers** — people engaging with a competitor's LinkedIn posts (Apify).
 - **Hiring signal** — companies actively hiring for a role = buying intent (Apify job scrape).
-- **Tech-stack** — companies using (or missing) a specific tool. **Tool: TechSight** (free, no API key) —
-  enrich the sourced company CSV with each domain's tech stack, then filter by the tech your client targets
-  (e.g. "on Zoho/HubSpot/Shopify"). See `references/techsight-cli.md`. Great free qualifier on any list.
+- **Tech-stack** — companies using a specific tool. **Primary:** AI Ark `technologies` filter (source
+  companies on a given tech directly). **Fallback:** **TechSight** (free, no key) — detect/confirm the tech
+  stack on any sourced list, then filter (e.g. "on Zoho/HubSpot"). See `references/techsight-cli.md`.
 - **Tenure-based** — brand-new-in-role or long-tenured decision-makers.
 - **Local / geo** — local businesses by category + location (bulk 12M CSV first, then Serper).
 - **Firmographic** — filter by industry, size, funding, revenue (AI Ark company search / bulk 900K).

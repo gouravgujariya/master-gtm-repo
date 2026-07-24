@@ -1,7 +1,10 @@
 # TechSight — CLI Reference (free tech-stack detection)
 
 - **Role:** detect each company's **tech stack** from its domain (7,500+ technologies, Wappalyzer signatures).
-  Powers the **tech-stack campaign angle** (filter/target companies by what they use or lack).
+  Powers the **tech-stack campaign angle**.
+- **Position: FALLBACK.** Prefer **AI Ark's `technologies` filter** to *source* companies by tech directly.
+  Use TechSight to **detect/confirm** the stack on a list you already have (free), or when AI Ark's tech data
+  is thin.
 - **Source:** https://github.com/MitchellkellerLG/techsight-cli (MIT, open-source, LeadGrow)
 - **Cost / auth:** **FREE — no API key.** Detects from HTTP headers, cookies, meta tags, script srcs, HTML,
   DNS TXT, TLS certs. Default 95% confidence, needs 2+ independent signals.
