@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTM Console — Team View</title>
+<style>
+  :root{--bg:#eef1f5;--panel:#fff;--panel2:#f7f9fc;--ink:#141a22;--muted:#5a6675;--line:#dce2ea;--lineS:#c4ccd8;--accent:#3b60e4;--go:#1f9d5c;--stop:#cf4a54;--data:#0e8c7f;--send:#6a4fd6;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:"Helvetica Neue",Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  @media(prefers-color-scheme:dark){:root{--bg:#0d1117;--panel:#161d27;--panel2:#111823;--ink:#e7ecf3;--muted:#93a0b2;--line:#242e3b;--lineS:#33404f;--accent:#7d97ff;--go:#3fca82;--stop:#ec6b74;--data:#3bb8a6;--send:#a394f0}}
+  :root[data-theme="dark"]{--bg:#0d1117;--panel:#161d27;--panel2:#111823;--ink:#e7ecf3;--muted:#93a0b2;--line:#242e3b;--lineS:#33404f;--accent:#7d97ff;--go:#3fca82;--stop:#ec6b74}
+  :root[data-theme="light"]{--bg:#eef1f5;--panel:#fff;--panel2:#f7f9fc;--ink:#141a22;--muted:#5a6675;--line:#dce2ea;--lineS:#c4ccd8;--accent:#3b60e4}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px}
+  a{color:var(--accent)}
+  header{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  .brand{font-weight:800;letter-spacing:-.02em;font-size:18px}.brand span{color:var(--accent)}
+  .tag{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  select,button{font-family:inherit;font-size:13px}
+  select{background:var(--panel2);color:var(--ink);border:1px solid var(--lineS);border-radius:9px;padding:8px 10px}
+  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-weight:650;cursor:pointer}
+  button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--lineS)}
+  .toggle{cursor:pointer;background:var(--panel2);color:var(--ink);border:1px solid var(--lineS);border-radius:999px;padding:7px 12px;font-family:var(--mono);font-size:12px}
+  main{max-width:1180px;margin:0 auto;padding:22px;display:grid;gap:18px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;border-top:3px solid var(--sc)}
+  .stat .v{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat .l{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .card h2{margin:0;padding:13px 16px;font-size:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .card .body{padding:12px 16px;max-height:560px;overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+  th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);position:sticky;top:0;background:var(--panel)}
+  .pill{font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:6px;border:1px solid}
+  .pill.ok{color:var(--go);border-color:var(--go)}.pill.no{color:var(--stop);border-color:var(--stop)}
+  .tabs{display:flex;gap:6px}.tabs button{padding:5px 11px;font-size:12px}.tabs button:not(.on){background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .muted{color:var(--muted)}.grow{flex:1}
+  /* login */
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:20}
+  .login{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;width:340px;text-align:center}
+  .login h1{font-size:20px;margin:0 0 4px}.login p{color:var(--muted);margin:0 0 18px;font-size:13px}
+  .login input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--lineS);background:var(--panel2);color:var(--ink);font-size:14px;margin-bottom:10px}
+  .login button{width:100%}.err{color:var(--stop);font-size:12.5px;min-height:16px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="gate">
+  <form class="login" onsubmit="login(event)">
+    <h1>GTM Console</h1>
+    <p>Team view — enter the dashboard password.</p>
+    <input id="pw" type="password" placeholder="Password" autofocus>
+    <button type="submit">View dashboard</button>
+    <div class="err" id="err"></div>
+  </form>
+</div>
+
+<header style="display:none" id="hdr">
+  <div class="brand">GTM<span>·</span>Console</div>
+  <span class="tag">read-only</span>
+  <span class="muted mono" style="font-size:11px">CLIENT</span>
+  <select id="client" onchange="loadAll()"></select>
+  <div class="grow"></div>
+  <button class="ghost" onclick="loadAll()">Refresh</button>
+  <a href="https://workflow-dusky-rho.vercel.app" target="_blank" class="mono" style="font-size:12px">workflow ↗</a>
+  <button class="toggle" onclick="toggleTheme()">◑</button>
+</header>
+
+<main id="main" style="display:none">
+  <div class="stats" id="stats"></div>
+  <div class="card">
+    <h2>Data
+      <div class="tabs" style="margin-left:8px"><button id="tabC" class="on" onclick="setTab('contacts')">Contacts</button><button id="tabK" onclick="setTab('companies')">Companies</button></div>
+    </h2>
+    <div class="body" id="tbl"></div>
+  </div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+let KEY = sessionStorage.getItem('gtm_key')||'';
+let tab='contacts';
+async function api(type, client){
+  const r = await fetch(`/api/data?type=${type}`+(client?`&client=${encodeURIComponent(client)}`:''),{headers:{'x-dashboard-key':KEY}});
+  if(r.status===401){ throw {code:401}; }
+  return r.json();
+}
+async function login(e){
+  e.preventDefault(); KEY=$('pw').value; sessionStorage.setItem('gtm_key',KEY);
+  try{ await api('clients'); enter(); }catch(err){ $('err').textContent = err.code===401?'Wrong password.':'Error connecting.'; }
+}
+function enter(){ $('gate').style.display='none'; $('hdr').style.display='flex'; $('main').style.display='grid'; boot(); }
+async function boot(){
+  const cs = await api('clients');
+  $('client').innerHTML = cs.map(c=>`<option value="${c}">${c}</option>`).join('') || '<option value="">no clients</option>';
+  loadAll();
+}
+function setTab(t){ tab=t; $('tabC').className=t==='contacts'?'on':''; $('tabK').className=t==='companies'?'on':''; renderTable(); }
+let CACHE={contacts:[],companies:[]};
+async function loadAll(){
+  const c=$('client').value; if(!c) return;
+  $('tbl').innerHTML='<span class="muted">Loading…</span>';
+  try{ CACHE.contacts=await api('contacts',c); CACHE.companies=await api('companies',c); }catch(e){ if(e.code===401){location.reload();return;} }
+  renderStats(); renderTable();
+}
+function renderStats(){
+  const ct=CACHE.contacts, co=CACHE.companies;
+  const sendable=ct.filter(r=>r.sendable).length;
+  const cards=[['companies',co.length,'var(--strategy,#b8791b)'],['contacts',ct.length,'var(--data)'],['sendable',sendable,'var(--go)'],['not sendable',ct.length-sendable,'var(--stop)']];
+  $('stats').innerHTML=cards.map(([l,v,c])=>`<div class="stat" style="--sc:${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+}
+function renderTable(){
+  const rows=CACHE[tab]||[];
+  if(!rows.length){ $('tbl').innerHTML='<span class="muted">No '+tab+' yet.</span>'; return; }
+  const cols=Object.keys(rows[0]);
+  $('tbl').innerHTML=`<div class="muted mono" style="font-size:11px;margin-bottom:6px">${rows.length} ${tab}</div>`+
+    `<table><thead><tr>${cols.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(r=>`<tr>${cols.map(k=> k==='sendable'
+      ? `<td><span class="pill ${r[k]?'ok':'no'}">${r[k]?'yes':'no'}</span></td>`
+      : `<td title="${r[k]??''}">${r[k]??''}</td>`).join('')}</tr>`).join('')+`</tbody></table>`;
+}
+function toggleTheme(){const r=document.documentElement;const cur=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');r.setAttribute('data-theme',cur==='dark'?'light':'dark');}
+if(KEY){ api('clients').then(enter).catch(()=>{}); }
+</script>
+</body>
+</html>
