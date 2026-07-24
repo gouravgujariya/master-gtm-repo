@@ -18,6 +18,7 @@
     "plusvibe-upload": "tsx scripts/plusvibe-upload.ts",
     "agenticdata-find": "tsx skills/agenticdata-contacts/scripts/agenticdata-find.ts",
     "new-client": "tsx scripts/new-client.ts",
+    "research": "tsx scripts/research.ts",
     "app": "tsx app/server.ts",
     "start": "tsx app/server.ts"
   },

@@ -5,223 +5,293 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GTM Console</title>
 <style>
-  :root{
-    --bg:#eef1f5;--panel:#fff;--panel2:#f7f9fc;--ink:#141a22;--muted:#5a6675;--line:#dce2ea;--lineS:#c4ccd8;
-    --accent:#3b60e4;--accentSoft:#e7ecfd;--go:#1f9d5c;--warn:#c58a1a;--stop:#cf4a54;
-    --strategy:#b8791b;--data:#0e8c7f;--send:#6a4fd6;--measure:#c0455f;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:"Helvetica Neue",Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
-  }
-  @media(prefers-color-scheme:dark){:root{--bg:#0d1117;--panel:#161d27;--panel2:#111823;--ink:#e7ecf3;--muted:#93a0b2;--line:#242e3b;--lineS:#33404f;--accent:#7d97ff;--accentSoft:#1b2540;--go:#3fca82;--warn:#e0ad4c;--stop:#ec6b74;--data:#3bb8a6;--send:#a394f0}}
-  :root[data-theme="dark"]{--bg:#0d1117;--panel:#161d27;--panel2:#111823;--ink:#e7ecf3;--muted:#93a0b2;--line:#242e3b;--lineS:#33404f;--accent:#7d97ff;--accentSoft:#1b2540;--go:#3fca82;--warn:#e0ad4c;--stop:#ec6b74;--data:#3bb8a6;--send:#a394f0}
+  :root{--bg:#eef1f5;--panel:#fff;--panel2:#f7f9fc;--ink:#141a22;--muted:#5a6675;--line:#dce2ea;--lineS:#c4ccd8;--accent:#3b60e4;--accentSoft:#e7ecfd;--go:#1f9d5c;--warn:#c58a1a;--stop:#cf4a54;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:"Helvetica Neue",Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  @media(prefers-color-scheme:dark){:root{--bg:#0d1117;--panel:#161d27;--panel2:#111823;--ink:#e7ecf3;--muted:#93a0b2;--line:#242e3b;--lineS:#33404f;--accent:#7d97ff;--accentSoft:#1b2540;--go:#3fca82;--warn:#e0ad4c;--stop:#ec6b74}}
+  :root[data-theme="dark"]{--bg:#0d1117;--panel:#161d27;--panel2:#111823;--ink:#e7ecf3;--muted:#93a0b2;--line:#242e3b;--lineS:#33404f;--accent:#7d97ff;--accentSoft:#1b2540;--go:#3fca82;--warn:#e0ad4c;--stop:#ec6b74}
   :root[data-theme="light"]{--bg:#eef1f5;--panel:#fff;--panel2:#f7f9fc;--ink:#141a22;--muted:#5a6675;--line:#dce2ea;--lineS:#c4ccd8;--accent:#3b60e4}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
   a{color:var(--accent)}
-  header{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;flex-wrap:wrap}
-  .brand{font-weight:800;letter-spacing:-.02em;font-size:18px}
-  .brand span{color:var(--accent)}
-  header .grow{flex:1}
-  select,input,button{font-family:inherit;font-size:13px}
-  select,input{background:var(--panel2);color:var(--ink);border:1px solid var(--lineS);border-radius:9px;padding:8px 10px}
-  input::placeholder{color:var(--muted)}
-  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-weight:650;cursor:pointer}
+  header{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  .brand{font-weight:800;letter-spacing:-.02em;font-size:17px}.brand span{color:var(--accent)}
+  select,input,button,textarea{font-family:inherit;font-size:13px}
+  select,input,textarea{background:var(--panel2);color:var(--ink);border:1px solid var(--lineS);border-radius:9px;padding:8px 10px}
+  textarea{width:100%;font-family:var(--mono);font-size:12.5px;line-height:1.5;resize:vertical}
+  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:650;cursor:pointer}
   button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--lineS)}
-  button:hover{filter:brightness(1.05)} button:disabled{opacity:.5;cursor:not-allowed}
-  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--go)}
-  main{max-width:1240px;margin:0 auto;padding:22px;display:grid;grid-template-columns:1fr;gap:20px}
-  .ctxbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .ctxbar label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:4px}
-  .stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-  .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;border-top:3px solid var(--sc)}
-  .stage h3{margin:0 0 3px;font-size:15px;display:flex;align-items:center;gap:8px}
-  .stage .num{font-family:var(--mono);font-size:11px;color:var(--sc);font-weight:700}
-  .stage p{margin:0 0 12px;color:var(--muted);font-size:12.5px}
-  .stage .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-  .stage .row>*{flex:1;min-width:90px}
-  .stage .tool{font-family:var(--mono);font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 6px;display:inline-block;margin-bottom:10px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .card h2{margin:0;padding:13px 16px;font-size:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-  .card .body{padding:12px 16px;max-height:420px;overflow:auto}
-  pre#console{margin:0;padding:14px 16px;font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto;background:var(--panel2);color:var(--ink)}
-  table{width:100%;border-collapse:collapse;font-size:12.5px}
-  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
-  th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);position:sticky;top:0;background:var(--panel)}
-  .pill{font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:6px;border:1px solid}
-  .pill.ok{color:var(--go);border-color:var(--go)} .pill.no{color:var(--stop);border-color:var(--stop)}
-  .tabs{display:flex;gap:6px} .tabs button{padding:5px 11px;font-size:12px}
-  .tabs button:not(.on){background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
-  .muted{color:var(--muted)} .mono{font-family:var(--mono)}
-  .toggle{cursor:pointer;background:var(--panel2);color:var(--ink);border:1px solid var(--lineS);border-radius:999px;padding:7px 12px;font-family:var(--mono);font-size:12px}
-  .status{display:flex;gap:6px;flex-wrap:wrap}
-  .k{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid var(--line)}
-  .k.on{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,transparent)} .k.off{color:var(--stop);border-color:color-mix(in srgb,var(--stop) 40%,transparent)}
+  button:disabled{opacity:.5;cursor:not-allowed}button:hover:not(:disabled){filter:brightness(1.05)}
+  .toggle{cursor:pointer;background:var(--panel2);color:var(--ink);border:1px solid var(--lineS);border-radius:999px;padding:7px 11px;font-family:var(--mono);font-size:12px}
+  .grow{flex:1}
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 55px)}
+  @media(max-width:820px){.layout{grid-template-columns:1fr}}
+  /* stepper */
+  .stepper{border-right:1px solid var(--line);padding:16px 12px;background:var(--panel)}
+  .stepper .hint{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 8px 10px}
+  .step{display:flex;gap:11px;align-items:flex-start;padding:10px 10px;border-radius:10px;cursor:pointer;margin-bottom:2px}
+  .step:hover{background:var(--panel2)} .step.active{background:var(--accentSoft)}
+  .step.locked{opacity:.45;cursor:not-allowed}
+  .step .num{flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:700;background:var(--panel2);border:1px solid var(--lineS);color:var(--muted)}
+  .step.active .num{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .step.done .num{background:var(--go);color:#fff;border-color:var(--go)}
+  .step .t{font-weight:650;font-size:13.5px}.step .d{color:var(--muted);font-size:11.5px}
+  /* main */
+  main{padding:22px;max-width:900px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
+  .panel h2{margin:0 0 3px;font-size:19px;letter-spacing:-.01em}
+  .panel .sub{color:var(--muted);margin:0 0 18px;font-size:13.5px}
+  .field{margin-bottom:14px}.field label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
+  .field input,.field textarea,.field select{width:100%}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
+  .actions{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .prompt{background:var(--panel2);border:1px dashed var(--lineS);border-radius:11px;padding:12px 14px;margin:12px 0;font-family:var(--mono);font-size:12px;white-space:pre-wrap;position:relative}
+  .prompt .copy{position:absolute;top:8px;right:8px;padding:4px 9px;font-size:11px}
+  .note{background:var(--accentSoft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:10px;padding:10px 13px;font-size:13px;margin:12px 0}
+  pre#console{margin:12px 0 0;padding:13px;font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto;background:var(--panel2);border:1px solid var(--line);border-radius:11px}
+  .files{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:3px 8px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+  th{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--muted)}
+  .pill{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:5px;border:1px solid}.pill.ok{color:var(--go);border-color:var(--go)}.pill.no{color:var(--stop);border-color:var(--stop)}
+  .ok-note{color:var(--go);font-weight:650}
+  /* login */
   #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:30}
   .login{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;width:340px;text-align:center}
   .login h1{font-size:20px;margin:0 0 4px}.login p{color:var(--muted);margin:0 0 18px;font-size:13px}
-  .login input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--lineS);background:var(--panel2);color:var(--ink);font-size:14px;margin-bottom:10px}
-  .login button{width:100%}.err{color:var(--stop);font-size:12.5px;min-height:16px;margin-top:8px}
+  .login input{width:100%;margin-bottom:10px}.login button{width:100%}.err{color:var(--stop);font-size:12.5px;min-height:16px;margin-top:8px}
 </style>
 </head>
 <body>
 <div id="gate" style="display:none"><form class="login" onsubmit="doLogin(event)"><h1>GTM Console</h1><p>Enter the team password.</p><input id="pw" type="password" autofocus placeholder="Password"><button type="submit">Enter</button><div class="err" id="lerr"></div></form></div>
-<header>
+
+<header id="hdr" style="display:none">
   <div class="brand">GTM<span>·</span>Console</div>
-  <label class="mono muted" style="font-size:11px">CLIENT</label>
-  <select id="client" onchange="onClient()"></select>
+  <select id="client" onchange="pickClient()"></select>
   <button class="ghost" onclick="newClient()">+ New client</button>
   <div class="grow"></div>
-  <span id="conn" class="mono muted" style="font-size:12px"><span class="dot"></span> local</span>
+  <span id="who" class="mono" style="font-size:12px;color:var(--muted)"></span>
   <a href="/workflow" target="_blank" class="mono" style="font-size:12px">workflow ↗</a>
   <button class="toggle" onclick="toggleTheme()">◑</button>
 </header>
 
-<main>
-  <!-- shared campaign context -->
-  <div class="ctxbar">
-    <label>CAMPAIGN</label><input id="slug" value="lookalike" size="12" title="campaign slug">
-    <label>PERSONA</label><input id="persona" placeholder="Owner" size="12" title="target title">
-    <label>SEGMENT</label><input id="segment" placeholder="segment" size="12">
-    <label>MARKET</label><input id="market" value="US" size="6">
-    <span class="grow"></span>
-    <span class="muted mono" style="font-size:12px" id="paths"></span>
-  </div>
-
-  <!-- pipeline stages -->
-  <div class="stages" id="stages"></div>
-
-  <!-- console + data -->
-  <div class="grid2">
-    <div class="card">
-      <h2>Run output <span class="grow" style="flex:1"></span><span id="jobstat" class="mono muted"></span></h2>
-      <pre id="console">Select a client and run a stage. Output streams here.</pre>
-    </div>
-    <div class="card">
-      <h2>Data
-        <div class="tabs" style="margin-left:8px"><button id="tabC" class="on" onclick="setTab('contacts')">Contacts</button><button id="tabK" onclick="setTab('companies')">Companies</button></div>
-        <span class="grow" style="flex:1"></span><button class="ghost" onclick="loadData()">Refresh</button>
-      </h2>
-      <div class="body" id="data"><span class="muted">Pick a client to load Supabase data.</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Environment</h2>
-    <div class="body"><div class="status" id="env"></div></div>
-  </div>
-</main>
+<div class="layout" id="layout" style="display:none">
+  <nav class="stepper" id="stepper"></nav>
+  <main id="main"></main>
+</div>
 
 <script>
-const $ = (id)=>document.getElementById(id);
-let KEY = sessionStorage.getItem('gtm_app_key')||'';
-const hf = (u,o={})=>{ o.headers = Object.assign({'x-app-key':KEY}, o.headers||{}); return fetch(u,o); };
-const ctx = ()=>({ client: $('client').value, slug: $('slug').value||'lookalike', persona: $('persona').value, segment: $('segment').value, market: $('market').value });
-const paths = (c)=>({
-  companies:`profiles/${c.client}/lead-database/companies-${c.slug}.csv`,
-  contacts:`profiles/${c.client}/lead-database/contacts-${c.slug}.csv`,
-  verified:`profiles/${c.client}/lead-database/contacts-verified-${c.slug}.csv`,
-  sequence:`profiles/${c.client}/campaigns/sequence.json`,
+const $=id=>document.getElementById(id);
+let KEY=sessionStorage.getItem('gtm_app_key')||'';
+const hf=(u,o={})=>{o.headers=Object.assign({'x-app-key':KEY}, o.headers||{}); return fetch(u,o);};
+const jpost=(u,body)=>hf(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
+
+let CLIENT='', NAME='', state=null, view=0, polling=null;
+
+const STEPS=[
+  {t:'Inputs',d:'website + documents'},
+  {t:'Research & ICP',d:'analyze + confirm ICP'},
+  {t:'Strategy',d:'persona, market, seeds'},
+  {t:'Source',d:'find companies'},
+  {t:'Find',d:'decision-makers'},
+  {t:'Verify',d:'emails'},
+  {t:'Copy',d:'write emails'},
+  {t:'Draft',d:'to Plusvibe'},
+];
+const CAMPAIGN=()=> (state&&state.slug)||'lookalike';
+const P=()=>({
+  companies:`profiles/${CLIENT}/lead-database/companies-${CAMPAIGN()}.csv`,
+  contacts:`profiles/${CLIENT}/lead-database/contacts-${CAMPAIGN()}.csv`,
+  verified:`profiles/${CLIENT}/lead-database/contacts-verified-${CAMPAIGN()}.csv`,
+  sequence:`profiles/${CLIENT}/campaigns/sequence.json`,
 });
 
-const STAGES = [
-  { n:'01', c:'var(--strategy)', key:'source', title:'Source companies', tool:'ai-ark (lookalike)', desc:'Find lookalike companies via AI Ark from seed domains (the client’s case-study customers). Pushed to Supabase.',
-    fields:[['seeds','text','seed domains, comma-separated'],['size','text','40']],
-    build:(c,f)=>({cmd:'ai-ark',args:{companies:true,lookalike:f.seeds,size:f.size||40,out:paths(c).companies,push:true,client:c.client,segment:c.segment,market:c.market,source:'ai-ark-lookalike'}}) },
-  { n:'02', c:'var(--data)', key:'find', title:'Find decision-makers', tool:'agenticdata-find', desc:'AgenticData (primary) finds contacts + emails per company, persona-first.',
-    fields:[['limit','text','40'],['target','text','12']],
-    build:(c,f)=>({cmd:'agenticdata-find',args:{in:paths(c).companies,out:paths(c).contacts,title:c.persona,limit:f.limit||40,target:f.target||12}}) },
-  { n:'03', c:'var(--send)', key:'verify', title:'Verify emails', tool:'verify-emails', desc:'OptimaVerifier gate (+AI Ark rescue). Pushes verified contacts to Supabase.',
-    fields:[],
-    build:(c)=>({cmd:'verify-emails',args:{in:paths(c).contacts,out:paths(c).verified,push:true,client:c.client,segment:c.segment,market:c.market,source:'agenticdata'}}) },
-  { n:'04', c:'var(--measure)', key:'draft', title:'Draft to Plusvibe', tool:'plusvibe-upload', desc:'Create a DRAFT campaign with up to N verified leads. Never sends.',
-    fields:[['max','text','10']],
-    build:(c,f)=>({cmd:'plusvibe-upload',args:{leads:paths(c).verified,sequence:paths(c).sequence,max:f.max||10}}) },
-];
+/* ---------- auth ---------- */
+async function checkAuth(){ const r=await hf('/api/status'); if(r.status===401){$('gate').style.display='flex';return;} enter(); }
+async function doLogin(e){ e.preventDefault(); KEY=$('pw').value; sessionStorage.setItem('gtm_app_key',KEY);
+  const r=await hf('/api/status'); if(r.status===401){$('lerr').textContent='Wrong password.';return;} enter(); }
+function enter(){ $('gate').style.display='none'; $('hdr').style.display='flex'; $('layout').style.display='grid'; loadClients(); }
 
-function renderStages(){
-  $('stages').innerHTML = STAGES.map((s,i)=>`
-    <div class="stage" style="--sc:${s.c}">
-      <h3><span class="num">${s.n}</span> ${s.title}</h3>
-      <p>${s.desc}</p>
-      <span class="tool">${s.tool}</span>
-      <div class="row">${s.fields.map(([k,t,opt])=> t==='select'
-        ? `<select id="f-${s.key}-${k}">${opt.map(o=>`<option>${o}</option>`).join('')}</select>`
-        : `<input id="f-${s.key}-${k}" placeholder="${opt}">`).join('')}</div>
-      <button onclick="runStage(${i})" style="width:100%">Run ${s.title.split(' ')[0].toLowerCase()}</button>
-    </div>`).join('');
-}
-function fieldsOf(s){ const o={}; s.fields.forEach(([k])=>o[k]=($(`f-${s.key}-${k}`)||{}).value||''); return o; }
-
-let polling=null;
-async function runStage(i){
-  const c=ctx(); if(!c.client){ alert('Pick or create a client first.'); return; }
-  const s=STAGES[i]; const {cmd,args}=s.build(c, fieldsOf(s));
-  $('console').textContent = `Starting ${s.title}…`;
-  const r = await hf('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd,args})}).then(r=>r.json());
-  if(r.error){ $('console').textContent = 'Error: '+r.error; return; }
-  poll(r.jobId, s.key);
-}
-function poll(jobId, key){
-  clearInterval(polling);
-  polling = setInterval(async ()=>{
-    const j = await hf('/api/job/'+jobId).then(r=>r.json());
-    $('console').textContent = j.output; $('console').scrollTop = $('console').scrollHeight;
-    $('jobstat').textContent = j.status;
-    if(j.status!=='running'){ clearInterval(polling); if(j.status==='done'){ loadData(); } }
-  }, 1200);
-}
-
+/* ---------- clients ---------- */
 async function loadClients(sel){
-  const cs = await hf('/api/clients').then(r=>r.json());
-  $('client').innerHTML = '<option value="">— select client —</option>'+cs.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('');
-  if(sel) $('client').value = sel;
+  const cs=await hf('/api/clients').then(r=>r.json());
+  $('client').innerHTML='<option value="">— select client —</option>'+cs.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('');
+  if(sel){ $('client').value=sel; pickClient(); }
 }
 async function newClient(){
-  const name = prompt('New client name (e.g. Acme Co):'); if(!name) return;
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  const r = await hf('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cmd:'new-client',args:{name}})}).then(r=>r.json());
-  poll(r.jobId,'new');
-  setTimeout(async ()=>{ await loadClients(slug); onClient(); $('console').textContent = `✅ Client "${name}" created and selected.\n\nNext: set the Persona + seed domains above, then click "Run source".`; }, 2600);
+  const name=prompt('New client name (e.g. Acme Co):'); if(!name) return;
+  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  await jpost('/api/run',{cmd:'new-client',args:{name}});
+  setTimeout(()=>loadClients(slug), 2500);
 }
-function onClient(){ updatePaths(); loadData(); }
-function updatePaths(){ const c=ctx(); $('paths').textContent = c.client ? paths(c).verified : ''; }
-['slug','persona','segment','market'].forEach(id=>$(id).addEventListener('input',updatePaths));
+async function pickClient(){
+  CLIENT=$('client').value; if(!CLIENT){ $('main').innerHTML=''; $('stepper').innerHTML=''; return; }
+  NAME=$('client').selectedOptions[0].text;
+  state=await hf('/api/client-state?client='+CLIENT).then(r=>r.json());
+  view=state.step; render();
+}
+async function saveState(patch){ state=await jpost('/api/client-state',{client:CLIENT,patch}); }
+async function approve(i){ await saveState({approved:{[i]:true}, step:Math.max(state.step,i+1)}); view=i+1; render(); }
 
-let tab='contacts';
-function setTab(t){ tab=t; $('tabC').className = t==='contacts'?'on':''; $('tabK').className = t==='companies'?'on':''; loadData(); }
-async function loadData(){
-  const c=ctx(); if(!c.client){ return; }
-  $('data').innerHTML = '<span class="muted">Loading…</span>';
-  const rows = await hf(`/api/${tab}?client=${c.client}`).then(r=>r.json());
-  if(rows.error){ $('data').innerHTML = `<span class="muted">${rows.error}</span>`; return; }
-  if(!rows.length){ $('data').innerHTML = `<span class="muted">No ${tab} yet for ${c.client}. Run the pipeline.</span>`; return; }
-  const cols = Object.keys(rows[0]);
-  $('data').innerHTML = `<div class="muted mono" style="font-size:11px;margin-bottom:6px">${rows.length} ${tab}</div>`+
-    `<table><thead><tr>${cols.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`+
-    rows.map(r=>`<tr>${cols.map(k=>{
-      if(k==='sendable') return `<td><span class="pill ${r[k]?'ok':'no'}">${r[k]?'yes':'no'}</span></td>`;
-      return `<td title="${(r[k]??'')}">${r[k]??''}</td>`;
-    }).join('')}</tr>`).join('')+`</tbody></table>`;
+/* ---------- render ---------- */
+function render(){
+  $('stepper').innerHTML='<div class="hint">'+NAME+'</div>'+STEPS.map((s,i)=>{
+    const done=state.approved&&state.approved[i], locked=i>state.step, active=i===view;
+    return `<div class="step ${active?'active':''} ${done?'done':''} ${locked?'locked':''}" onclick="${locked?'':`go(${i})`}">
+      <div class="num">${done?'✓':i}</div><div><div class="t">${s.t}</div><div class="d">${s.d}</div></div></div>`;
+  }).join('');
+  $('main').innerHTML=PANELS[view](); if(afterRender[view]) afterRender[view]();
 }
-async function loadEnv(){
-  const s = await hf('/api/status').then(r=>r.json());
-  $('env').innerHTML = s.env.map(e=>`<span class="k ${e.present?'on':'off'}">${e.key.replace('_API_KEY','').replace('_KEY','').replace('SUPABASE_SERVICE_ROLE','SUPABASE')} ${e.present?'✓':'—'}</span>`).join('');
+function go(i){ if(i<=state.step){ view=i; render(); } }
+const consoleHTML=()=>`<pre id="console">—</pre>`;
+function runAndPoll(cmd,args,done){
+  $('console')&&($('console').textContent='Starting…');
+  jpost('/api/run',{cmd,args}).then(r=>{
+    if(r.error){$('console').textContent='Error: '+r.error;return;}
+    clearInterval(polling);
+    polling=setInterval(async()=>{
+      const j=await hf('/api/job/'+r.jobId).then(x=>x.json());
+      if($('console')){$('console').textContent=j.output;$('console').scrollTop=$('console').scrollHeight;}
+      if(j.status!=='running'){clearInterval(polling); if(done)done(j);}
+    },1200);
+  });
 }
-function toggleTheme(){ const r=document.documentElement; const cur=r.getAttribute('data-theme')|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); r.setAttribute('data-theme', cur==='dark'?'light':'dark'); }
+function copyPrompt(el){ navigator.clipboard.writeText(el.parentElement.getAttribute('data-p')); el.textContent='copied'; setTimeout(()=>el.textContent='copy',1200); }
 
-async function boot(){ renderStages(); await loadClients(); loadEnv(); }
-async function checkAuth(){
-  const r = await hf('/api/status');
-  if(r.status===401){ $('gate').style.display='flex'; return; }
-  $('gate').style.display='none'; boot();
+/* ---------- data table ---------- */
+async function dataTable(type){
+  const rows=await hf('/api/'+type+'?client='+CLIENT).then(r=>r.json());
+  if(!Array.isArray(rows)||!rows.length) return `<div class="sub">No ${type} yet — run the step above.</div>`;
+  const cols=Object.keys(rows[0]);
+  return `<div class="mono" style="font-size:11px;color:var(--muted);margin-top:12px">${rows.length} ${type}</div><div style="overflow:auto;max-height:300px"><table><thead><tr>${cols.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(r=>`<tr>${cols.map(k=> k==='sendable'?`<td><span class="pill ${r[k]?'ok':'no'}">${r[k]?'yes':'no'}</span></td>`:`<td title="${r[k]??''}">${r[k]??''}</td>`).join('')}</tr>`).join('')+`</tbody></table></div>`;
 }
-async function doLogin(e){
-  e.preventDefault(); KEY=$('pw').value; sessionStorage.setItem('gtm_app_key',KEY);
-  const r = await hf('/api/status');
-  if(r.status===401){ $('lerr').textContent='Wrong password.'; return; }
-  $('gate').style.display='none'; boot();
+
+/* ---------- panels ---------- */
+const afterRender={};
+
+const PANELS=[
+  /* 0 INPUTS */ ()=>`
+    <div class="panel">
+      <h2>Step 0 · Client inputs</h2>
+      <p class="sub">Enter the client's website and upload everything they gave you. This feeds the research.</p>
+      <div class="field"><label>Client website</label><input id="i-website" value="${state.website||''}" placeholder="https://client.com"></div>
+      <div class="field"><label>Questionnaire / notes (paste)</label><textarea id="i-quest" rows="7" placeholder="Paste the onboarding questionnaire, call notes, anything about the client…"></textarea></div>
+      <div class="field"><label>Upload files (case studies, decks, docs)</label><input type="file" multiple id="i-files" onchange="uploadFiles(this)"><div class="files" id="i-filelist"></div></div>
+      <div class="actions"><button onclick="saveInputs()">Save &amp; continue →</button><span id="i-msg" class="ok-note"></span></div>
+    </div>`,
+
+  /* 1 RESEARCH & ICP */ ()=>`
+    <div class="panel">
+      <h2>Step 1 · Research &amp; ICP</h2>
+      <p class="sub">First read the client's website, then draft the ICP in Claude Code, then review it here.</p>
+      <div class="actions"><button onclick="runAndPoll('research',{client:NAME,website:state.website})">Run website research</button>
+        <span class="sub">reads ${state.website||'(set website in step 0)'} via FireCrawl</span></div>
+      ${consoleHTML()}
+      <div class="note">Now open <b>Claude Code</b> in this repo and paste the prompt below. It reads the research + your uploads and writes the ICP into <span class="mono">client-profile.yaml</span>. Then click <b>Reload ICP</b>.</div>
+      <div class="prompt" data-p="Read profiles/${CLIENT}/research/website-research.md and everything in profiles/${CLIENT}/inputs/. Draft this client's ICP and lookalike seed domains (from their case-study customers) into profiles/${CLIENT}/client-profile.yaml — fill icp.primary_persona, industries, geography, and add a 'lookalike_seeds' list. Keep it concise."><button class="copy" onclick="copyPrompt(this)">copy</button>Read profiles/${CLIENT}/research/website-research.md and everything in profiles/${CLIENT}/inputs/. Draft this client's ICP and lookalike seed domains (from their case-study customers) into profiles/${CLIENT}/client-profile.yaml. Fill icp.primary_persona, industries, geography, and add a 'lookalike_seeds' list. Keep it concise.</div>
+      <div class="field"><label>ICP — client-profile.yaml (editable)</label><textarea id="i-icp" rows="14">loading…</textarea></div>
+      <div class="actions"><button class="ghost" onclick="loadFile('client-profile.yaml','i-icp')">Reload ICP</button><button class="ghost" onclick="saveFile('client-profile.yaml','i-icp')">Save edits</button><button onclick="approve(1)">Approve ICP →</button></div>
+    </div>`,
+
+  /* 2 STRATEGY */ ()=>`
+    <div class="panel">
+      <h2>Step 2 · Strategy</h2>
+      <p class="sub">Confirm the target persona, market, segment, and the lookalike seed domains (from case studies).</p>
+      <div class="row">
+        <div class="field"><label>Campaign name</label><input id="s-slug" value="${state.slug||'lookalike'}"></div>
+        <div class="field"><label>Persona (target title)</label><input id="s-persona" value="${state.persona||''}" placeholder="Owner"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Market</label><input id="s-market" value="${state.market||'US'}"></div>
+        <div class="field"><label>Segment</label><input id="s-segment" value="${state.segment||''}" placeholder="fintech-saas"></div>
+      </div>
+      <div class="field"><label>Lookalike seed domains (comma-separated)</label><input id="s-seeds" value="${state.seeds||''}" placeholder="acme.com, globex.com"></div>
+      <div class="actions"><button onclick="saveStrategy()">Approve strategy →</button><span id="s-msg" class="ok-note"></span></div>
+    </div>`,
+
+  /* 3 SOURCE */ ()=>`
+    <div class="panel">
+      <h2>Step 3 · Source companies</h2>
+      <p class="sub">Builds lookalike companies from the seed domains and saves them to Supabase.</p>
+      <div class="actions"><button onclick="runSource()">Run source</button><span class="sub">seeds: ${state.seeds||'(set in step 2)'}</span></div>
+      ${consoleHTML()}
+      <div id="d-companies"></div>
+      <div class="actions"><button class="ghost" onclick="refreshData('companies','d-companies')">Refresh list</button><button onclick="approve(3)">Approve companies →</button></div>
+    </div>`,
+
+  /* 4 FIND */ ()=>`
+    <div class="panel">
+      <h2>Step 4 · Find decision-makers</h2>
+      <p class="sub">AgenticData finds the ${state.persona||'decision-maker'} + email at each company.</p>
+      <div class="actions"><button onclick="runFind()">Run find</button></div>
+      ${consoleHTML()}
+      <div id="d-contacts"></div>
+      <div class="actions"><button class="ghost" onclick="refreshData('contacts','d-contacts')">Refresh list</button><button onclick="approve(4)">Approve contacts →</button></div>
+    </div>`,
+
+  /* 5 VERIFY */ ()=>`
+    <div class="panel">
+      <h2>Step 5 · Verify emails</h2>
+      <p class="sub">OptimaVerifier checks every email (with AI Ark catch-all rescue). Verified contacts save to Supabase.</p>
+      <div class="actions"><button onclick="runVerify()">Run verify</button></div>
+      ${consoleHTML()}
+      <div id="d-verified"></div>
+      <div class="actions"><button class="ghost" onclick="refreshData('contacts','d-verified')">Refresh list</button><button onclick="approve(5)">Approve verified →</button></div>
+    </div>`,
+
+  /* 6 COPY */ ()=>`
+    <div class="panel">
+      <h2>Step 6 · Copy</h2>
+      <p class="sub">Write company + persona emails in Claude Code, then review/edit them here.</p>
+      <div class="note">Open <b>Claude Code</b> and paste this. It writes the sequence into <span class="mono">campaigns/sequence.json</span>. Then click <b>Reload copy</b>.</div>
+      <div class="prompt" data-p="Write a cold email sequence for ${NAME} into profiles/${CLIENT}/campaigns/sequence.json using Eric's rules + the company+persona variant (subjects 2-3 words). Target persona: ${state.persona||'decision-maker'}. Base it on client-profile.yaml and the verified contacts."><button class="copy" onclick="copyPrompt(this)">copy</button>Write a cold email sequence for ${NAME} into profiles/${CLIENT}/campaigns/sequence.json using Eric's rules + the company+persona variant (subjects 2-3 words). Target persona: ${state.persona||'decision-maker'}. Base it on client-profile.yaml and the verified contacts.</div>
+      <div class="field"><label>sequence.json (editable)</label><textarea id="i-seq" rows="16">loading…</textarea></div>
+      <div class="actions"><button class="ghost" onclick="loadFile('campaigns/sequence.json','i-seq')">Reload copy</button><button class="ghost" onclick="saveFile('campaigns/sequence.json','i-seq')">Save edits</button><button onclick="approve(6)">Approve copy →</button></div>
+    </div>`,
+
+  /* 7 DRAFT */ ()=>`
+    <div class="panel">
+      <h2>Step 7 · Draft to Plusvibe</h2>
+      <p class="sub">Creates the campaign in Plusvibe as a DRAFT with up to 10 verified leads. It never sends — you review and hit Start in Plusvibe.</p>
+      <div class="actions"><button onclick="runDraft()">Create Plusvibe draft</button></div>
+      ${consoleHTML()}
+    </div>`,
+];
+
+/* ---------- step actions ---------- */
+afterRender[1]=()=>loadFile('client-profile.yaml','i-icp');
+afterRender[6]=()=>loadFile('campaigns/sequence.json','i-seq');
+afterRender[3]=()=>refreshData('companies','d-companies');
+afterRender[4]=()=>refreshData('contacts','d-contacts');
+afterRender[5]=()=>refreshData('contacts','d-verified');
+
+async function saveInputs(){
+  const website=$('i-website').value.trim(); const quest=$('i-quest').value;
+  await saveState({website});
+  if(quest.trim()) await jpost('/api/upload',{client:CLIENT,filename:'questionnaire.md',text:quest});
+  $('i-msg').textContent='Saved ✓';
+  await saveState({approved:{0:true}, step:Math.max(state.step,1)}); view=1; setTimeout(render,400);
 }
+async function uploadFiles(input){
+  for(const f of input.files){
+    const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(f);});
+    await jpost('/api/upload',{client:CLIENT,filename:f.name,b64});
+  }
+  const list=await hf('/api/inputs?client='+CLIENT).then(r=>r.json());
+  $('i-filelist').innerHTML=list.map(f=>`<span class="chip">${f}</span>`).join('');
+}
+async function loadFile(name,el){ const r=await hf('/api/file?client='+CLIENT+'&name='+encodeURIComponent(name)).then(x=>x.json()); if($(el)) $(el).value=r.content||'(empty — not created yet)'; }
+async function saveFile(name,el){ await jpost('/api/file',{client:CLIENT,name,content:$(el).value}); alert('Saved.'); }
+async function saveStrategy(){
+  await saveState({slug:$('s-slug').value||'lookalike',persona:$('s-persona').value,market:$('s-market').value,segment:$('s-segment').value,seeds:$('s-seeds').value});
+  $('s-msg').textContent='Saved ✓'; approve(2);
+}
+function runSource(){ runAndPoll('ai-ark',{companies:true,lookalike:state.seeds,size:40,out:P().companies,push:true,client:NAME,segment:state.segment,market:state.market,source:'ai-ark-lookalike'}, ()=>refreshData('companies','d-companies')); }
+function runFind(){ runAndPoll('agenticdata-find',{in:P().companies,out:P().contacts,title:state.persona,limit:40,target:12}, ()=>refreshData('contacts','d-contacts')); }
+function runVerify(){ runAndPoll('verify-emails',{in:P().contacts,out:P().verified,push:true,client:NAME,segment:state.segment,market:state.market,source:'agenticdata'}, ()=>refreshData('contacts','d-verified')); }
+function runDraft(){ runAndPoll('plusvibe-upload',{leads:P().verified,sequence:P().sequence,max:10}); }
+async function refreshData(type,el){ if($(el)) $(el).innerHTML=await dataTable(type); }
+
+function toggleTheme(){const r=document.documentElement;const cur=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');r.setAttribute('data-theme',cur==='dark'?'light':'dark');}
 checkAuth();
 </script>
 </body>

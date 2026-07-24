@@ -32,7 +32,7 @@ async function sb(path: string): Promise<any> {
 const COMMANDS = new Set([
   "bulk-list", "agenticdata-find", "ai-ark", "coldiq", "verify-emails",
   "plusvibe-upload", "supabase-push", "supabase-push-companies", "supabase-upload",
-  "new-client", "check-credits",
+  "new-client", "check-credits", "research",
 ]);
 type Job = { id: string; cmd: string; status: "running" | "done" | "error"; output: string; code: number | null; started: number };
 const jobs = new Map<string, Job>();
@@ -82,6 +82,27 @@ async function allClients() {
   return [...map.values()];
 }
 
+// ---- per-client wizard state + files ----
+const clientDir = (client: string) => resolve(ROOT, "profiles", (client || "").replace(/[^a-z0-9-]/gi, ""));
+const DEFAULT_STATE = { step: 0, approved: {} as Record<string, boolean>, website: "", persona: "", market: "US", segment: "", seeds: "", slug: "lookalike" };
+function readState(client: string): any {
+  const f = resolve(clientDir(client), "state.json");
+  if (existsSync(f)) { try { return { ...DEFAULT_STATE, ...JSON.parse(readFileSync(f, "utf8")) }; } catch {} }
+  return { ...DEFAULT_STATE };
+}
+function writeState(client: string, patch: any): any {
+  const dir = clientDir(client); mkdirSync(dir, { recursive: true });
+  const cur = readState(client);
+  const next = { ...cur, ...patch };
+  if (patch.approved) next.approved = { ...(cur.approved || {}), ...patch.approved };
+  writeFileSync(resolve(dir, "state.json"), JSON.stringify(next, null, 2));
+  return next;
+}
+const safeFile = (client: string, name: string) => {
+  const f = resolve(clientDir(client), (name || "").replace(/\.\.+/g, ""));
+  return f.startsWith(clientDir(client)) ? f : null;
+};
+
 function envStatus() {
   const keys = ["ADATA_API_KEY", "AI_ARK_API_KEY", "COLDIQ_API_KEY", "OPTIMAVERIFIER_API_KEY", "APIFY_TOKEN", "SERPER_API_KEY", "FIRECRAWL_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "PLUSVIBE_API_KEY"];
   return keys.map((k) => ({ key: k, present: !!(ENV[k] && ENV[k].length) }));
@@ -113,6 +134,39 @@ const server = createServer(async (req, res) => {
     if (p === "/api/clients") return json(res, 200, await allClients());
     if (p === "/api/companies") return json(res, 200, await sb(`companies?select=company_name,domain,industry,company_size,location,list_source&client=eq.${u.searchParams.get("client")}&order=created_at.desc&limit=200`));
     if (p === "/api/contacts") return json(res, 200, await sb(`contacts?select=email,first_name,last_name,company_name,title,email_status,sendable,find_source,list_source&client=eq.${u.searchParams.get("client")}&order=created_at.desc&limit=200`));
+
+    // wizard: per-client state
+    if (p === "/api/client-state" && req.method === "GET") return json(res, 200, readState(u.searchParams.get("client") || ""));
+    if (p === "/api/client-state" && req.method === "POST") { const b = await readBody(req); return json(res, 200, writeState(b.client, b.patch || {})); }
+
+    // wizard: upload an input (file as base64, or pasted text)
+    if (p === "/api/upload" && req.method === "POST") {
+      const b = await readBody(req);
+      const dir = resolve(clientDir(b.client), "inputs"); mkdirSync(dir, { recursive: true });
+      const fname = (b.filename || "input.txt").replace(/[^a-z0-9._-]/gi, "_");
+      try {
+        if (b.b64) writeFileSync(resolve(dir, fname), Buffer.from(b.b64, "base64"));
+        else writeFileSync(resolve(dir, fname), b.text || "");
+        return json(res, 200, { ok: true, saved: fname });
+      } catch (e: any) { return json(res, 500, { error: String(e.message) }); }
+    }
+    if (p === "/api/inputs" && req.method === "GET") {
+      const dir = resolve(clientDir(u.searchParams.get("client") || ""), "inputs");
+      return json(res, 200, existsSync(dir) ? readdirSync(dir).filter((f) => !f.startsWith(".")) : []);
+    }
+
+    // wizard: read / write a client file (for reviewing + editing ICP, sequence, etc.)
+    if (p === "/api/file" && req.method === "GET") {
+      const f = safeFile(u.searchParams.get("client") || "", u.searchParams.get("name") || "");
+      if (!f) return json(res, 400, { error: "bad path" });
+      return json(res, 200, { content: existsSync(f) ? readFileSync(f, "utf8") : "" });
+    }
+    if (p === "/api/file" && req.method === "POST") {
+      const b = await readBody(req); const f = safeFile(b.client, b.name);
+      if (!f) return json(res, 400, { error: "bad path" });
+      mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, b.content || "");
+      return json(res, 200, { ok: true });
+    }
 
     if (p === "/api/run" && req.method === "POST") {
       const body = await readBody(req);
