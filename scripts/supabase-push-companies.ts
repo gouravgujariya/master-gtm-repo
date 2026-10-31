@@ -9,8 +9,8 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { args, parseCsv } from "../lib/env.js";
-import { upsert, slug, editorUrl, TableMissingError, explainMissing } from "../lib/supabase.js";
+import { args, parseCsv } from "../lib/env.ts";
+import { upsert, slug, editorUrl, TableMissingError, explainMissing } from "../lib/supabase.ts";
 
 async function main() {
   const a = args();

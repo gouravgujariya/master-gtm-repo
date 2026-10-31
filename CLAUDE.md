@@ -1,5 +1,10 @@
 # CLAUDE.md — GTM operating instructions (read automatically by Claude Code)
 
+## Graph-first (MANDATORY for every agent)
+Before reading or changing any code/docs, use the **`graph-first`** skill (`.claude/skills/graph-first/SKILL.md`):
+**graph → code → graph.** Query `graphify-out/` first (`graphify query|explain|affected`), then read the code,
+and after any change run `graphify update .` (code) or `/graphify . --update` (docs) before calling the task done.
+
 ## Trigger
 When the user says **"GTM"** (or runs **/gtm**), or asks to run a campaign / onboard a client / build a
 GTM strategy → **start the GTM Orchestration below.**

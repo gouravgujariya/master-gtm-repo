@@ -8,59 +8,26 @@
  *   npm run coldiq -- --in=missing.csv --out=found.csv [--linkedin-col=linkedin_url]
  *
  * Docs: references/coldiq-api.md  (POST /gtm-verbs/find-work-email {person_linkedin_url}; GET /credits)
+ * Logic: src/providers/coldiq.ts
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { requireKey, args, parseCsv, toCsv, sleep } from "../../../lib/env.js";
+import { args, parseCsv, toCsv, sleep } from "../../../lib/env.ts";
+import { cliCtx, runCli } from "../../../src/core/ctx.ts";
+import { ciq, findWorkEmail } from "../../../src/providers/coldiq.ts";
 
-const BASE = "https://api.coldiq.com";
-const KEY = requireKey("COLDIQ_API_KEY");
-
-async function ciq(path: string, init: RequestInit = {}): Promise<any> {
-  const res = await fetch(`${BASE}${path}`, {
-    ...init,
-    headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json", ...(init.headers || {}) },
-  });
-  const text = await res.text();
-  let json: any; try { json = text ? JSON.parse(text) : {}; } catch { json = { raw: text }; }
-  if (!res.ok) throw new Error(`ColdIQ ${path} -> ${res.status}: ${text.slice(0, 300)}`);
-  return json;
-}
-
-function normalizeLinkedIn(url: string): string {
-  const u = url.trim();
-  return u.startsWith("http") ? u : `https://${u}`;
-}
-
-/** Returns the found work email (or null). Uses ColdIQ's LimaData provider (LinkedIn -> work email). */
-async function findWorkEmail(linkedin: string): Promise<string | null> {
-  const r = await ciq("/v1/limadata/find/work-email-linkedin", {
-    method: "POST",
-    body: JSON.stringify({ linkedin_url: normalizeLinkedIn(linkedin) }),
-  });
-  // LimaDataResponse is untyped/nullable — try common shapes
-  return r?.email ?? r?.work_email ?? r?.data?.email ?? r?.result?.email ?? (typeof r === "string" ? r : null);
-}
-
-/** Fallback finder by name + company domain (when no LinkedIn URL is available). */
-async function findWorkEmailByName(fullName: string, domain: string): Promise<string | null> {
-  const r = await ciq("/v1/limadata/find/work-email", {
-    method: "POST",
-    body: JSON.stringify({ full_name: fullName, company_domain: domain }),
-  });
-  return r?.email ?? r?.work_email ?? r?.data?.email ?? r?.result?.email ?? (typeof r === "string" ? r : null);
-}
-
-async function main() {
+runCli(async () => {
+  const ctx = cliCtx();
+  ctx.getKey("COLDIQ_API_KEY"); // fail fast, like before
   const a = args();
 
   if (a.credits) {
-    const c = await ciq("/v1/me/credits");
+    const c = await ciq(ctx, "/v1/me/credits");
     console.log("ColdIQ credits:", c.balance ?? JSON.stringify(c), c.usedThisMonth != null ? `(used this month: ${c.usedThisMonth})` : "");
     return;
   }
 
   if (typeof a.linkedin === "string") {
-    const email = await findWorkEmail(a.linkedin);
+    const email = await findWorkEmail(ctx, a.linkedin);
     console.log(email ? `Found: ${email}` : "No email found.");
     return;
   }
@@ -79,7 +46,7 @@ async function main() {
     const li = (r[col] || "").trim();
     if (!li) { out.push({ ...r, coldiq_email: "", coldiq_note: "no linkedin url" }); continue; }
     try {
-      const email = await findWorkEmail(li);
+      const email = await findWorkEmail(ctx, li);
       if (email) found++;
       out.push({ ...r, coldiq_email: email || "", coldiq_note: email ? "found" : "not found" });
     } catch (e: any) {
@@ -89,6 +56,4 @@ async function main() {
   }
   writeFileSync(outPath, toCsv(out));
   console.log(`ColdIQ: found ${found}/${rows.length}. Wrote ${outPath}. (Verify any new emails with OptimaVerifier.)`);
-}
-
-main().catch((e) => { console.error("\n" + (e?.message || e)); process.exit(1); });
+});

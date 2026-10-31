@@ -1,0 +1,808 @@
+{
+  "results": {
+    "research": {
+      "icp": {
+        "name": "Scriptlens",
+        "domain": "scriptlens.ai",
+        "description": "AI-powered script analysis platform with buyer-fit intelligence, offering layered feedback from industry pros to help writers refine their work.",
+        "foundedYear": 2025,
+        "employees": "1–10",
+        "geo": "GB",
+        "keywords": [
+          "script coverage",
+          "screenplay analysis",
+          "development feedback",
+          "buyer fit",
+          "creative ally",
+          "layered analysis",
+          "industry standards",
+          "genre-specific"
+        ],
+        "product": {
+          "title": "AI screenplay analysis and coverage",
+          "points": [
+            "Buyer-fit intelligence matching scripts to market buyers",
+            "Layered feedback: AI plus industry professional notes",
+            "Development-focused iterative rewrites, not just one-off coverage"
+          ]
+        },
+        "icp": {
+          "personas": [
+            "Founder / CEO of an independent film financier",
+            "Head of Development",
+            "Head of Production"
+          ],
+          "titles": [
+            "Founder",
+            "CEO",
+            "Managing Director",
+            "Head of Development",
+            "Head of Production",
+            "Producer"
+          ],
+          "industries": [
+            "Film finance",
+            "Film production",
+            "Film sales",
+            "Screenwriting education",
+            "Talent management"
+          ],
+          "geographies": [
+            "United Kingdom"
+          ],
+          "companySize": "1-50",
+          "valueProp": "Vet scripts faster: buyer-fit intelligence plus layered pro notes before money or time is committed.",
+          "seedDomains": [
+            "northlightcapital.co.uk",
+            "fenwickfilmfund.com",
+            "larkspurpictures.com"
+          ]
+        }
+      }
+    },
+    "competitors": {
+      "queries": [
+        "AI script analysis",
+        "screenplay coverage software",
+        "script feedback platform"
+      ],
+      "competitors": [
+        {
+          "domain": "scriptpulse.io",
+          "name": "Scriptpulse",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "coveragehub.com",
+          "name": "Coveragehub",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "draftreader.ai",
+          "name": "Draftreader",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "pagecritic.com",
+          "name": "Pagecritic",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "scriptmetrics.io",
+          "name": "Scriptmetrics",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "storygrade.com",
+          "name": "Storygrade",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "reelnotes.ai",
+          "name": "Reelnotes",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "scenecheck.io",
+          "name": "Scenecheck",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "loglinelab.com",
+          "name": "Loglinelab",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "beatboard.ai",
+          "name": "Beatboard",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "writerroom.tools",
+          "name": "Writerroom",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "plotscore.com",
+          "name": "Plotscore",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "screenfeedback.co",
+          "name": "Screenfeedback",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "coverly.ai",
+          "name": "Coverly",
+          "why": "Ranks for script coverage / analysis searches"
+        },
+        {
+          "domain": "pitchfolio.film",
+          "name": "Pitchfolio",
+          "why": "Ranks for script coverage / analysis searches"
+        }
+      ]
+    },
+    "segments": {
+      "segments": [
+        {
+          "name": "Indie financiers",
+          "angle": "lookalike",
+          "icon": "💷",
+          "sizeEstimate": "1.5K",
+          "desc": "Vet incoming projects faster and back scripts with commercial potential.",
+          "pain": "Too many submissions, too little time to read",
+          "criteria": [
+            "Funds independent films",
+            "Early project selection",
+            "Commercial return focus"
+          ],
+          "examples": [
+            "Northlight Capital",
+            "Fenwick Film Fund",
+            "Larkspur Pictures",
+            "Greyhaven Media"
+          ],
+          "valuePropCategory": "save time",
+          "targeting": {
+            "dataset": "lookalike",
+            "filters": {
+              "location": "United Kingdom"
+            },
+            "seedDomains": [
+              "northlightcapital.co.uk",
+              "fenwickfilmfund.com",
+              "larkspurpictures.com"
+            ],
+            "titles": [
+              "Founder",
+              "CEO",
+              "Managing Director"
+            ]
+          }
+        },
+        {
+          "name": "Indie film writers",
+          "angle": "creative-ideas",
+          "icon": "✍️",
+          "sizeEstimate": "1.2K",
+          "desc": "Get professional coverage before submitting to festivals and producers.",
+          "pain": "Coverage is expensive and slow",
+          "criteria": [
+            "Independent feature writers",
+            "Submitting to festivals",
+            "Seeking script notes"
+          ],
+          "examples": [
+            "Writers' collectives",
+            "Festival alumni",
+            "Script labs"
+          ],
+          "valuePropCategory": "save money",
+          "targeting": {
+            "dataset": "saas",
+            "filters": {
+              "industry": "independent feature writers",
+              "location": "United Kingdom"
+            },
+            "seedDomains": [],
+            "titles": [
+              "Founder",
+              "Head of Development"
+            ]
+          }
+        },
+        {
+          "name": "Screenwriting schools",
+          "angle": "firmographic",
+          "icon": "🎓",
+          "sizeEstimate": "2.2K",
+          "desc": "Give students professional coverage, teach revision skills, and benchmark drafts.",
+          "pain": "Students need practical feedback beyond classroom critique",
+          "criteria": [
+            "Cohort-based writing courses",
+            "Industry-facing curriculum",
+            "Frequent script workshops"
+          ],
+          "examples": [
+            "London film schools",
+            "Screenwriting academies",
+            "Online writing programs"
+          ],
+          "valuePropCategory": "make money",
+          "targeting": {
+            "dataset": "saas",
+            "filters": {
+              "industry": "cohort-based writing courses",
+              "location": "United Kingdom"
+            },
+            "seedDomains": [],
+            "titles": [
+              "Founder",
+              "Head of Development"
+            ]
+          }
+        },
+        {
+          "name": "Film schools",
+          "angle": "firmographic",
+          "icon": "🎬",
+          "sizeEstimate": "1.2K",
+          "desc": "Support student feedback, teach script structure, and track rewrite progress.",
+          "pain": "Tutors need scalable, consistent script feedback",
+          "criteria": [
+            "Screenwriting course",
+            "Student script assignments",
+            "Feedback-heavy curriculum"
+          ],
+          "examples": [
+            "Westbridge Film School",
+            "Arden Institute",
+            "Harrow Media College"
+          ],
+          "valuePropCategory": "save time",
+          "targeting": {
+            "dataset": "saas",
+            "filters": {
+              "industry": "screenwriting course",
+              "location": "United Kingdom"
+            },
+            "seedDomains": [],
+            "titles": [
+              "Founder",
+              "Head of Development"
+            ]
+          }
+        },
+        {
+          "name": "TV development teams",
+          "angle": "creative-ideas",
+          "icon": "📺",
+          "sizeEstimate": "1.0K",
+          "desc": "Filter series submissions, compare episode potential, and guide development meetings.",
+          "pain": "Hard to judge series potential quickly",
+          "criteria": [
+            "Scripted TV development",
+            "Receives pitches regularly",
+            "Small editorial team"
+          ],
+          "examples": [
+            "Copperline TV",
+            "Bluefin Productions",
+            "Oakmere Studios"
+          ],
+          "valuePropCategory": "save time",
+          "targeting": {
+            "dataset": "saas",
+            "filters": {
+              "industry": "scripted tv development",
+              "location": "United Kingdom"
+            },
+            "seedDomains": [],
+            "titles": [
+              "Founder",
+              "Head of Development"
+            ]
+          }
+        },
+        {
+          "name": "Talent managers",
+          "angle": "tenure",
+          "icon": "🤝",
+          "sizeEstimate": "600",
+          "desc": "Screen client projects, identify sellable angles, and sharpen pitch readiness.",
+          "pain": "Hard to tell which scripts deserve representation time",
+          "criteria": [
+            "Represents writers or creators",
+            "Reviews material regularly",
+            "Career development focus"
+          ],
+          "examples": [
+            "Kestrel Agency",
+            "Marlow Talent",
+            "Fairway Management"
+          ],
+          "valuePropCategory": "make money",
+          "targeting": {
+            "dataset": "saas",
+            "filters": {
+              "industry": "represents writers or creators",
+              "location": "United Kingdom"
+            },
+            "seedDomains": [],
+            "titles": [
+              "Founder",
+              "Head of Development"
+            ]
+          }
+        }
+      ]
+    },
+    "source": {
+      "companies": [
+        {
+          "companyName": "Northlight Capital",
+          "domain": "northlightcapital.co.uk",
+          "industry": "Film finance",
+          "companySize": "11-22",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Fenwick Film Fund",
+          "domain": "fenwickfilmfund.com",
+          "industry": "Film finance",
+          "companySize": "1-2",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Larkspur Pictures",
+          "domain": "larkspurpictures.com",
+          "industry": "Film finance",
+          "companySize": "4-8",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Greyhaven Media",
+          "domain": "greyhavenmedia.com",
+          "industry": "Film finance",
+          "companySize": "1-2",
+          "location": "Wimborne, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Saltmarsh Sales",
+          "domain": "saltmarshsales.com",
+          "industry": "Film finance",
+          "companySize": "5-10",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Brightwater Films",
+          "domain": "brightwaterfilms.com",
+          "industry": "Film finance",
+          "companySize": "7-14",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Elm Street Finance",
+          "domain": "elmstreetfinance.com",
+          "industry": "Film finance",
+          "companySize": "4-8",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Elevation Loans",
+          "domain": "elevation-loans.co.uk",
+          "industry": "Film finance",
+          "companySize": "2-4",
+          "location": "United Kingdom",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Tidewell Productions",
+          "domain": "tidewellproductions.com",
+          "industry": "Film finance",
+          "companySize": "5-10",
+          "location": "Harpenden, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Pennant Pictures",
+          "domain": "pennantpictures.com",
+          "industry": "Film finance",
+          "companySize": "6-12",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Ashcombe Films",
+          "domain": "ashcombe-films.com",
+          "industry": "Film finance",
+          "companySize": "7-14",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        },
+        {
+          "companyName": "Quillstone Films",
+          "domain": "quillstonefilms.com",
+          "industry": "Film finance",
+          "companySize": "3-6",
+          "location": "London, UK",
+          "listSource": "ai-ark-lookalike"
+        }
+      ]
+    },
+    "find": {
+      "contacts": [
+        {
+          "email": "adam@northlightcapital.co.uk",
+          "firstName": "Adam",
+          "lastName": "Reeve",
+          "title": "Founder",
+          "companyName": "Northlight Capital",
+          "companyDomain": "northlightcapital.co.uk",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/adam-reeve-demo"
+        },
+        {
+          "email": "alexa@fenwickfilmfund.com",
+          "firstName": "Alexa",
+          "lastName": "Pryor",
+          "title": "Founder & Creative Director",
+          "companyName": "Fenwick Film Fund",
+          "companyDomain": "fenwickfilmfund.com",
+          "findSource": "ai-ark",
+          "linkedinUrl": "https://www.linkedin.com/in/alexa-pryor-demo"
+        },
+        {
+          "email": "amara@larkspurpictures.com",
+          "firstName": "Amara",
+          "lastName": "Lyle",
+          "title": "Executive Producer & CEO",
+          "companyName": "Larkspur Pictures",
+          "companyDomain": "larkspurpictures.com",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/amara-lyle-demo"
+        },
+        {
+          "email": "augusta@saltmarshsales.com",
+          "firstName": "Augusta",
+          "lastName": "Lind",
+          "title": "Producer",
+          "companyName": "Saltmarsh Sales",
+          "companyDomain": "saltmarshsales.com",
+          "findSource": "coldiq",
+          "linkedinUrl": "https://www.linkedin.com/in/augusta-lind-demo"
+        },
+        {
+          "email": "ben@brightwaterfilms.com",
+          "firstName": "Ben",
+          "lastName": "Pike",
+          "title": "Founder | Post-Production Producer",
+          "companyName": "Brightwater Films",
+          "companyDomain": "brightwaterfilms.com",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/ben-pike-demo"
+        },
+        {
+          "email": "claire@elmstreetfinance.com",
+          "firstName": "Claire",
+          "lastName": "Dubois",
+          "title": "Managing Director",
+          "companyName": "Elm Street Finance",
+          "companyDomain": "elmstreetfinance.com",
+          "findSource": "ai-ark",
+          "linkedinUrl": "https://www.linkedin.com/in/claire-dubois-demo"
+        },
+        {
+          "email": "caroline@elevation-loans.co.uk",
+          "firstName": "Caroline",
+          "lastName": "Stone",
+          "title": "Founder and MD",
+          "companyName": "Elevation Loans",
+          "companyDomain": "elevation-loans.co.uk",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/caroline-stone-demo"
+        },
+        {
+          "email": "christian@tidewellproductions.com",
+          "firstName": "Christian",
+          "lastName": "Parr",
+          "title": "Founder & CEO",
+          "companyName": "Tidewell Productions",
+          "companyDomain": "tidewellproductions.com",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/christian-parr-demo"
+        },
+        {
+          "email": "chris@ashcombe-films.com",
+          "firstName": "Chris",
+          "lastName": "Hurst",
+          "title": "Co-Founder & CEO",
+          "companyName": "Ashcombe Films",
+          "companyDomain": "ashcombe-films.com",
+          "findSource": "ai-ark",
+          "linkedinUrl": "https://www.linkedin.com/in/chris-hurst-demo"
+        },
+        {
+          "email": "christopher@quillstonefilms.com",
+          "firstName": "Christopher",
+          "lastName": "Fogg",
+          "title": "CEO",
+          "companyName": "Quillstone Films",
+          "companyDomain": "quillstonefilms.com",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/christopher-fogg-demo"
+        },
+        {
+          "email": "fiona@northlightcapital.co.uk",
+          "firstName": "Fiona",
+          "lastName": "Jacks",
+          "title": "Producer",
+          "companyName": "Northlight Capital",
+          "companyDomain": "northlightcapital.co.uk",
+          "findSource": "coldiq",
+          "linkedinUrl": "https://www.linkedin.com/in/fiona-jacks-demo"
+        },
+        {
+          "email": "grainne@fenwickfilmfund.com",
+          "firstName": "Grainne",
+          "lastName": "Pell",
+          "title": "Managing Director",
+          "companyName": "Fenwick Film Fund",
+          "companyDomain": "fenwickfilmfund.com",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/grainne-pell-demo"
+        },
+        {
+          "email": "iris@greyhavenmedia.com",
+          "firstName": "Iris",
+          "lastName": "Cole",
+          "title": "Head of Production",
+          "companyName": "Greyhaven Media",
+          "companyDomain": "greyhavenmedia.com",
+          "findSource": "ai-ark",
+          "linkedinUrl": "https://www.linkedin.com/in/iris-cole-demo"
+        },
+        {
+          "email": "isabel@saltmarshsales.com",
+          "firstName": "Isabel",
+          "lastName": "Shore",
+          "title": "Good Pitch Producer",
+          "companyName": "Saltmarsh Sales",
+          "companyDomain": "saltmarshsales.com",
+          "findSource": "agenticdata",
+          "linkedinUrl": "https://www.linkedin.com/in/isabel-shore-demo"
+        },
+        {
+          "email": "ivan@brightwaterfilms.com",
+          "firstName": "Ivan",
+          "lastName": "Kell",
+          "title": "Head of Production",
+          "companyName": "Brightwater Films",
+          "companyDomain": "brightwaterfilms.com",
+          "findSource": "coldiq",
+          "linkedinUrl": "https://www.linkedin.com/in/ivan-kell-demo"
+        }
+      ]
+    },
+    "verify": {
+      "contacts": [
+        {
+          "email": "adam@northlightcapital.co.uk",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "alexa@fenwickfilmfund.com",
+          "emailStatus": "catch-all",
+          "sendable": true,
+          "verifyNote": "rescued: AI Ark source-verified VALID"
+        },
+        {
+          "email": "amara@larkspurpictures.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "augusta@saltmarshsales.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "ben@brightwaterfilms.com",
+          "emailStatus": "unknown",
+          "sendable": false,
+          "verifyNote": "unknown: hold, re-verify later"
+        },
+        {
+          "email": "claire@elmstreetfinance.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "caroline@elevation-loans.co.uk",
+          "emailStatus": "invalid",
+          "sendable": false,
+          "verifyNote": "dropped: invalid"
+        },
+        {
+          "email": "christian@tidewellproductions.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "chris@ashcombe-films.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "christopher@quillstonefilms.com",
+          "emailStatus": "catch-all",
+          "sendable": false,
+          "verifyNote": "catch-all: needs cross-check (AgenticData)"
+        },
+        {
+          "email": "fiona@northlightcapital.co.uk",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "grainne@fenwickfilmfund.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "iris@greyhavenmedia.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "isabel@saltmarshsales.com",
+          "emailStatus": "valid",
+          "sendable": true,
+          "verifyNote": ""
+        },
+        {
+          "email": "ivan@brightwaterfilms.com",
+          "emailStatus": "unknown",
+          "sendable": false,
+          "verifyNote": "unknown: hold, re-verify later"
+        }
+      ],
+      "counts": {
+        "sendable": 11,
+        "held": 3,
+        "dropped": 1
+      }
+    },
+    "copy": {
+      "subject": "Script selection",
+      "sequence": [
+        {
+          "step": 1,
+          "waitDays": 0,
+          "body": "{{personalization}}"
+        },
+        {
+          "step": 2,
+          "waitDays": 3,
+          "body": "Hi {{first_name}},\n\nQuick follow-up: happy to send 2-3 short notes on how buyer-fit scoring would apply to the scripts {{company_name}} is reviewing right now.\n\nWorth a look?\n\n[Sender Name]"
+        },
+        {
+          "step": 3,
+          "waitDays": 4,
+          "body": "Hi {{first_name}},\n\nLast note from me. If script triage isn't a priority this quarter, no worries. Should I check back in the new year?\n\n[Sender Name]"
+        }
+      ],
+      "leads": [
+        {
+          "email": "adam@northlightcapital.co.uk",
+          "body": "Hi Adam,\n\nI noticed Northlight Capital focuses on independent film financier specialising in tax incentives and pre-sales, funding 200+ projects since 2004. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "alexa@fenwickfilmfund.com",
+          "body": "Hi Alexa,\n\nI noticed Fenwick Film Fund focuses on film investment platform connecting independent producers with strategic investors through rigorous vetting. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "amara@larkspurpictures.com",
+          "body": "Hi Amara,\n\nI noticed Larkspur Pictures focuses on independent film finance firm providing equity investment and co-production support for indie fiction. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "augusta@saltmarshsales.com",
+          "body": "Hi Augusta,\n\nI noticed Saltmarsh Sales focuses on global film sales agency specialising in art-house cinema and festival-driven titles. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "claire@elmstreetfinance.com",
+          "body": "Hi Claire,\n\nI noticed Elm Street Finance focuses on investment fund offering EIS tax relief and music rights with double-digit returns. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "christian@tidewellproductions.com",
+          "body": "Hi Christian,\n\nI noticed Tidewell Productions focuses on connects investors with studios via industry networks, offering tax-efficient returns. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "chris@ashcombe-films.com",
+          "body": "Hi Chris,\n\nI noticed Ashcombe Films focuses on independent film financier providing bespoke sales and tax credit support for 8–10 projects a year. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "fiona@northlightcapital.co.uk",
+          "body": "Hi Fiona,\n\nI noticed Northlight Capital focuses on independent film financier specialising in tax incentives and pre-sales, funding 200+ projects since 2004. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "grainne@fenwickfilmfund.com",
+          "body": "Hi Grainne,\n\nI noticed Fenwick Film Fund focuses on film investment platform connecting independent producers with strategic investors through rigorous vetting. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "iris@greyhavenmedia.com",
+          "body": "Hi Iris,\n\nI noticed Greyhaven Media focuses on completion guarantees and gap finance for features, ensuring production stays on budget. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        },
+        {
+          "email": "isabel@saltmarshsales.com",
+          "body": "Hi Isabel,\n\nI noticed Saltmarsh Sales focuses on global film sales agency specialising in art-house cinema and festival-driven titles. That selection challenge is real.\n\nI'm [Sender Name] at Scriptlens. We offer AI-powered script analysis with buyer-fit intelligence, plus layered feedback from industry pros.\n\nWould a few short written ideas on how buyer-fit intelligence applies to your script selection be useful?\n\nBest,\n[Sender Name]"
+        }
+      ]
+    },
+    "draft": {
+      "externalCampaignId": "DEMO-0001",
+      "uploaded": 11
+    }
+  },
+  "logs": {
+    "research": [
+      "fetching scriptlens.ai…",
+      "reading homepage + pricing…",
+      "extracting positioning…"
+    ],
+    "competitors": [
+      "searching similar products…",
+      "comparing feature sets…",
+      "ranking 15 competitors…"
+    ],
+    "segments": [
+      "clustering use cases…",
+      "matching pains to buyers…",
+      "scoring 6 campaign ideas…"
+    ],
+    "source": [
+      "building search queries from campaign…",
+      "querying the company index — 312 matches…",
+      "scoring fit for 1,284 domains…",
+      "ranking the outreach list…"
+    ],
+    "find": [
+      "selecting decision-makers per company…",
+      "pinning persona: founder / CEO / head of production…",
+      "deduping by email + LinkedIn…",
+      "finding emails: AgenticData → AI Ark → ColdIQ…"
+    ],
+    "copy": [
+      "picking the hottest leads…",
+      "drafting the first emails…"
+    ],
+    "verify": [
+      "verifying every email with OptimaVerifier…",
+      "11 sendable · 3 held · 1 dropped"
+    ],
+    "draft": [
+      "creating Plusvibe DRAFT campaign…",
+      "uploaded 11 verified leads",
+      "draft only: a human must click Start"
+    ]
+  }
+}

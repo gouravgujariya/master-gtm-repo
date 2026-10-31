@@ -1,48 +1,89 @@
-# Deploy the GTM Console to the web (Railway)
+# Deploy on Railway
 
-This hosts the **full operating app** (not just the read-only view) on the internet, so you can run the
-whole pipeline from any computer. It uses Railway (an always-on server host — unlike Vercel, it can run
-the multi-minute find/verify jobs).
+One GitHub repo → one Railway project → two environments, each with its own Postgres + two services:
 
-You do this once, in Railway's website. ~15 minutes. Cost: free trial, then ~$5/month for always-on.
+| Service | Start | Railway settings |
+|---|---|---|
+| `api` | `npm start` | pre-deploy `npm run db:migrate:deploy`, healthcheck `/health`, public domain |
+| `worker` | `npm run worker` | no domain/healthcheck, restart `ON_FAILURE`, Volume at `/data` |
+| `postgres` | — | Railway Postgres; services get `DATABASE_URL` by reference |
 
-## Before you start
-The app is already cloud-ready and pushed to GitHub. On the web version, "Source companies" uses **AI Ark
-lookalikes** (no local files needed). Everything saves to Supabase.
+| Environment | Branch | Notes |
+|---|---|---|
+| `production` | `main` | `DEMO_MODE=off`, `LLM_DAILY_BUDGET_USD=20` |
+| `development` | `develop` | `DEMO_MODE=auto`, `LLM_DAILY_BUDGET_USD=5` |
 
-## Steps
+All of this is declared in **`.railway/railway.ts`** (Railway Infrastructure as Code). We don't use
+`railway.json` because Config as Code is deprecated. New services can't opt into it, and existing
+files stop being read on 2026-12-01 ([docs](https://docs.railway.com/config-as-code)).
 
-### 1. Create the project
-1. Go to **https://railway.app** and **Sign in with GitHub** (the `krishna-designwork` account).
-2. Click **New Project → Deploy from GitHub repo**.
-3. If asked, **authorize Railway** to see your repos, then pick **`master-gtm-repo`**.
-4. Railway starts building it automatically. Let it run.
+## One-time setup
 
-### 2. Add your keys (Variables)
-1. Click the service (the box named after the repo) → the **Variables** tab.
-2. Click **Raw Editor**.
-3. Open your local **`.env`** file (in `Master GTM Repo`, open it with TextEdit) and **paste its entire
-   contents** into the Raw Editor.
-4. Add **one more line** at the bottom — your team password:
+1. **Install the CLI and SDK:** `npm i -g @railway/cli`, `railway login`, then `npm i -D railway`. The SDK provides `railway/iac`.
+2. **Create the project:** `railway init` (name `master-gtm`), then create a `development` environment in the dashboard. `production` exists already.
+3. **Connect GitHub:** install the Railway GitHub App on `gouravgujariya/master-gtm-repo`. Autodeploy needs a project member with contributor access.
+4. **Set shared variables per environment.** In the dashboard, go to Project, then Shared Variables. Set these separately in each environment and never commit them:
+   `SECRETS_MASTER_KEY` (`openssl rand -base64 32`, back it up), `ANTHROPIC_API_KEY`, `FIRECRAWL_API_KEY`,
+   `ADATA_API_KEY`, `AI_ARK_API_KEY`, `COLDIQ_API_KEY`, `OPTIMAVERIFIER_API_KEY`, `PLUSVIBE_API_KEY`, `SERPER_API_KEY`.
+   Both services reference them as `${{shared.X}}`. If a key is missing it resolves empty, and under `DEMO_MODE=auto` that job falls back to fixtures.
+5. **Apply the infrastructure.** Run this once per environment:
+   ```bash
+   railway environment development && railway config plan && railway config apply
+   railway environment production  && railway config plan && railway config apply
    ```
-   APP_PASSWORD=choose-a-strong-password-here
+   Review the plan before you apply. An unexpected delete is a warning sign. This creates postgres, api, worker and the `worker-data` volume with the variables below.
+6. **Add the public domain:** go to api, then Settings, then Networking, and click **Generate Domain**. Do this in each environment. Generated domains can't be declared in IaC. `CORS_ORIGIN` resolves to `https://${{RAILWAY_PUBLIC_DOMAIN}}` automatically.
+7. **Turn on Wait for CI.** The IaC sets `checkSuites: true` on both services. The setting only appears after `.github/workflows/ci.yml` has run on a push. Once it's on, a deploy waits in `WAITING` until every GitHub Actions workflow on the commit passes, and is skipped if one fails.
+8. **Create the first admin user.** The pod's `DATABASE_URL` is private (`*.railway.internal`), so run the command inside the service:
+   ```bash
+   railway ssh --service api -- npx tsx scripts/add-user.ts --email=you@x.com --password='...'
    ```
-5. Click **Save/Update**. (Do NOT add a `PORT` line — Railway sets that itself.)
-   Railway will automatically rebuild with the keys.
+   Don't use `railway run npm run user:add`. It injects the private URL, which your laptop can't reach, and the script also requires a local `.env.development`.
 
-### 3. Get your public URL
-1. Go to the service → **Settings → Networking**.
-2. Click **Generate Domain**.
-3. You'll get a URL like **`gtm-console-production.up.railway.app`**.
+Later infra changes: edit `.railway/railway.ts`, then run `railway config plan` and `railway config apply`. Code changes deploy on push. Watch patterns limit which paths trigger a deploy: `src/**`, `fixtures/**`, `package*.json`, plus `ui-prototype/**` for api and `skills/**` for worker.
 
-### 4. Use it
-- Open that URL in any browser → you'll see a **login screen** → enter your `APP_PASSWORD`.
-- Now you (and anyone you share the URL + password with) can run the full pipeline from the web.
+## Variables (set by `.railway/railway.ts`)
 
-## Notes
-- **Two versions now exist:** the local app (`npm run app`, has the bulk-data sourcing) and this web app
-  (AI Ark sourcing). Both write to the same Supabase, so data is shared.
-- **To change the password:** Railway → Variables → edit `APP_PASSWORD` → it redeploys.
-- **To update the app later:** just push to GitHub — Railway auto-redeploys.
-- **Security:** your keys live only in Railway's Variables (encrypted), never in the browser. The app is
-  gated by `APP_PASSWORD`. Keep the repo private.
+| Var | api | worker | Value |
+|---|---|---|---|
+| `DATABASE_URL` | ✓ | ✓ | `${{postgres.DATABASE_URL}}` (that environment's own DB) |
+| `PORT` | injected | — | Railway sets it; don't set it yourself |
+| `NODE_ENV` | ✓ | ✓ | `production` in both environments, so cookies are secure behind HTTPS |
+| `RAILPACK_NODE_VERSION` | ✓ | ✓ | `24`, matching `.nvmrc` |
+| `DEMO_MODE` | ✓ | ✓ | prod `off`, dev `auto` |
+| `LLM_DAILY_BUDGET_USD` | ✓ | ✓ | prod `20`, dev `5` |
+| `CORS_ORIGIN` | ✓ | — | `https://${{RAILWAY_PUBLIC_DOMAIN}}`; append the gtm-ui origin, comma-separated, when it ships |
+| `STORAGE_DIR` | — | ✓ | `/data/files` (volume) |
+| `BULK_DIR` | — | ✓ | `/data/bulk` (volume) |
+| `WORKER_CONCURRENCY` | — | ✓ | `2` |
+| keys (step 4) | ✓ | ✓ | `${{shared.*}}` |
+
+## Files and bulk lists
+
+A volume attaches to **one** service, and a service can have only one volume. Services with a volume
+can't run replicas, and a redeploy causes brief downtime
+([docs](https://docs.railway.com/reference/volumes)). The volume is mounted on the **worker**, because
+the worker is the process that writes research markdown and reads the bulk CSVs. **The api must not
+read from `STORAGE_DIR`.** Anything the api serves, such as the research markdown, has to come from
+Postgres (the `files` table or `client_profiles.context_md`).
+
+**Uploading the bulk lists** (`Common Outbound Lists/`, several GB). Hobby volumes are capped at 5 GB,
+so this needs the **Pro** plan (50 GB). Resize the volume in the dashboard first. Then upload:
+```bash
+tar czf - "Common Outbound Lists" | railway ssh --service worker -- "mkdir -p /data/bulk && tar xzf - -C /data/bulk --strip-components=1"
+```
+I haven't verified that `railway ssh` accepts piped stdin. If the pipe fails, use `railway volume files` or scp over `railway ssh` instead. Volumes are per environment, so
+upload once to each environment that needs real sourcing.
+
+## CI (`.github/workflows/ci.yml`)
+
+CI runs on every push and PR. It runs Node from `.nvmrc`, then `npm ci`, `npm run typecheck`, migrations against a Postgres 16 service container, and `npm test`. `DATABASE_URL` and `TEST_DATABASE_URL` both point at that container, and `DEMO_MODE=on` so CI never calls paid providers.
+
+## Local dev (equivalent)
+
+```bash
+cp .env.example .env.development   # point DATABASE_URL at local Postgres (gtm_dev)
+npm run db:migrate                 # = pre-deploy
+npm run dev                        # api on :3000 + worker, both watching
+npm run user:add -- --email=you@x.com --password=...
+```

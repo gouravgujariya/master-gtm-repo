@@ -6,62 +6,19 @@
  *   npm run agenticdata-find -- --company-domain=stripe.com --title="VP Marketing"   # single test
  *
  * Base https://api.agenticdata.host · Authorization: Bearer ADATA_live_… · see references/agenticdata-api.md
- * This restores the intended waterfall (AgenticData PRIMARY → AI Ark → ColdIQ).
+ * This restores the intended waterfall (AgenticData PRIMARY → AI Ark → ColdIQ). Logic: src/providers/agenticdata.ts
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { requireKey, args, parseCsv, toCsv, sleep } from "../../../lib/env.js";
+import { args, parseCsv, toCsv, sleep } from "../../../lib/env.ts";
+import { cliCtx, runCli } from "../../../src/core/ctx.ts";
+import { clean, pickForCompany } from "../../../src/providers/agenticdata.ts";
 
-const BASE = "https://api.agenticdata.host";
-const KEY = requireKey("ADATA_API_KEY");
-const H = { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
-const clean = (d: string) => (d || "").replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "").trim();
-
-async function ad(path: string, init: RequestInit = {}): Promise<any> {
-  const res = await fetch(`${BASE}${path}`, { ...init, headers: { ...H, ...(init.headers || {}) } });
-  const t = await res.text();
-  let j: any; try { j = t ? JSON.parse(t) : {}; } catch { j = { raw: t }; }
-  if (!res.ok) throw new Error(`AgenticData ${path} -> ${res.status}: ${t.slice(0, 200)}`);
-  return j;
-}
-
-const SENIORITY = ["founder", "owner", "ceo", "chief", "president", "vp", "vice president", "head", "director", "principal", "partner", "manager"];
-const seniorityScore = (t: string) => { const l = (t || "").toLowerCase(); let b = 0; SENIORITY.forEach((k, i) => { if (l.includes(k)) b = Math.max(b, 100 - i); }); return b; };
-
-async function searchPeople(domain: string, title?: string, limit = 5): Promise<any[]> {
-  const q = new URLSearchParams({ company_domain: domain, limit: String(limit) });
-  if (title) q.set("title", title);
-  const r = await ad(`/v1/search/people?${q.toString()}`);
-  return r.results ?? r.data ?? r.people ?? [];
-}
-async function findEmail(first: string, last: string, domain: string): Promise<string | null> {
-  try {
-    const r = await ad("/v1/email/find", { method: "POST", body: JSON.stringify({ first_name: first, last_name: last, domain }) });
-    return r.email ?? r.result?.email ?? r.data?.email ?? (typeof r.result === "string" ? r.result : null);
-  } catch { return null; }
-}
-
-async function pickForCompany(domain: string, title?: string): Promise<Record<string, string> | null> {
-  const people = await searchPeople(domain, title, 5);
-  if (!people.length) return null;
-  const ranked = people
-    .map((p) => ({ p, score: (p.primary_email ? 50 : 0) + seniorityScore(p.job_title || "") }))
-    .sort((a, b) => b.score - a.score);
-  for (const { p } of ranked) {
-    let email = p.primary_email || null;
-    if (!email) email = await findEmail(p.first_name || "", p.last_name || "", domain);
-    if (email) return {
-      email: String(email).toLowerCase(), first_name: p.first_name || "", last_name: p.last_name || "",
-      company_name: p.company_name || "", company_domain: domain, title: p.job_title || "",
-      linkedin_url: p.linkedin_url || "", find_source: "agenticdata",
-    };
-  }
-  return null;
-}
-
-async function main() {
+runCli(async () => {
+  const ctx = cliCtx();
+  ctx.getKey("ADATA_API_KEY"); // fail fast, like before
   const a = args();
   if (a["company-domain"]) {
-    const c = await pickForCompany(clean(String(a["company-domain"])), a.title ? String(a.title) : undefined);
+    const c = await pickForCompany(ctx, clean(String(a["company-domain"])), a.title ? String(a.title) : undefined);
     console.log(c ? `Found: ${c.email} — ${c.first_name} ${c.last_name}, ${c.title}` : "No decision-maker with an email found.");
     return;
   }
@@ -77,7 +34,7 @@ async function main() {
     const domain = clean(c.domain || c.company_domain || "");
     if (!domain) continue;
     try {
-      const contact = await pickForCompany(domain, title);
+      const contact = await pickForCompany(ctx, domain, title);
       if (contact) { contact.company_name ||= c.company_name || ""; out.push(contact); console.log(`  ✓ ${domain}: ${contact.email} — ${contact.first_name} ${contact.last_name}, ${contact.title}`); }
       else console.log(`  - ${domain}: no decision-maker + email`);
     } catch (e: any) { console.log(`  - ${domain}: ${String(e.message).slice(0, 70)}`); }
@@ -85,6 +42,4 @@ async function main() {
   }
   writeFileSync(outPath, toCsv(out));
   console.log(`\nFound ${out.length} contacts across ${companies.length} companies (AgenticData primary). Wrote ${outPath}`);
-}
-
-main().catch((e) => { console.error("\n❌ " + (e?.message || e)); process.exit(1); });
+});

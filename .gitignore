@@ -22,3 +22,6 @@ dist/
 
 # Vercel project metadata
 .vercel/
+
+# Local file storage (backend)
+data/
