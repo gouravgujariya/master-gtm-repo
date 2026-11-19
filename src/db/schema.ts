@@ -72,7 +72,7 @@ export const files = pgTable("files", {
   storagePath: text("storage_path"),
   createdAt: createdAt(),
 }, (t) => [
-  check("files_kind_check", sql`${t.kind} in ('questionnaire','transcript','upload','research','other')`),
+  check("files_kind_check", sql`${t.kind} in ('questionnaire','transcript','case_study','dnc','upload','research','other')`),
   index("files_client_id_idx").on(t.clientId),
 ]);
 
@@ -86,6 +86,7 @@ export const campaigns = pgTable("campaigns", {
   targetMarket: text("target_market"),
   sendingProvider: text("sending_provider"),
   targeting: jsonb("targeting"), // source/find inputs edited in the UI (dataset, filters, titles, seeds)
+  offer: jsonb("offer"), // the campaign's front-end offer (offer job, founder-approved)
   sequence: jsonb("sequence"),
   externalCampaignId: text("external_campaign_id"),
   status: text("status").notNull().default("draft"),
@@ -106,6 +107,8 @@ export const companies = pgTable("companies", {
   location: text("location"),
   linkedinUrl: text("linkedin_url"),
   phone: text("phone"),
+  qualified: boolean("qualified"), // qualify job: true/false, null = not checked / site unreachable
+  qualifyReason: text("qualify_reason"),
   raw: jsonb("raw"),
   createdAt: createdAt(),
 }, (t) => [
@@ -192,7 +195,7 @@ export const approvals = pgTable("approvals", {
   decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
   decidedAt: ts("decided_at").notNull().defaultNow(),
 }, (t) => [
-  check("approvals_stage_check", sql`${t.stage} in ('icp','competitors','strategy','companies','contacts','copy','send')`),
+  check("approvals_stage_check", sql`${t.stage} in ('intake','icp','competitors','strategy','offer','companies','qualified','contacts','copy','send')`),
   check("approvals_decision_check", sql`${t.decision} in ('approved','rejected','revoked')`),
   index("approvals_client_id_idx").on(t.clientId, t.stage),
 ]);

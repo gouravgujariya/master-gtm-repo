@@ -180,7 +180,8 @@
               "CEO",
               "Managing Director"
             ]
-          }
+          },
+          "reachable": null
         },
         {
           "name": "Indie film writers",
@@ -211,7 +212,8 @@
               "Founder",
               "Head of Development"
             ]
-          }
+          },
+          "reachable": 3400
         },
         {
           "name": "Screenwriting schools",
@@ -242,7 +244,8 @@
               "Founder",
               "Head of Development"
             ]
-          }
+          },
+          "reachable": 12800
         },
         {
           "name": "Film schools",
@@ -273,7 +276,8 @@
               "Founder",
               "Head of Development"
             ]
-          }
+          },
+          "reachable": 41200
         },
         {
           "name": "TV development teams",
@@ -304,7 +308,8 @@
               "Founder",
               "Head of Development"
             ]
-          }
+          },
+          "reachable": 230500
         },
         {
           "name": "Talent managers",
@@ -335,7 +340,8 @@
               "Founder",
               "Head of Development"
             ]
-          }
+          },
+          "reachable": 1900
         }
       ]
     },
@@ -437,7 +443,11 @@
           "location": "London, UK",
           "listSource": "ai-ark-lookalike"
         }
-      ]
+      ],
+      "skipped": {
+        "competitor": 2,
+        "already used for this client": 1
+      }
     },
     "find": {
       "contacts": [
@@ -761,6 +771,85 @@
     "draft": {
       "externalCampaignId": "DEMO-0001",
       "uploaded": 11
+    },
+    "qualify": {
+      "results": [
+        {
+          "domain": "northlightcapital.co.uk",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "fenwickfilmfund.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "larkspurpictures.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "greyhavenmedia.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "saltmarshsales.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "brightwaterfilms.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "elmstreetfinance.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "elevation-loans.co.uk",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "tidewellproductions.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "pennantpictures.com",
+          "qualified": false,
+          "reason": "Site is a holding page with no film-finance activity described."
+        },
+        {
+          "domain": "ashcombe-films.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        },
+        {
+          "domain": "quillstonefilms.com",
+          "qualified": true,
+          "reason": "Site describes film finance work backing independent features — fits the indie-financier angle."
+        }
+      ],
+      "counts": {
+        "qualified": 11,
+        "rejected": 1,
+        "unknown": 0
+      }
+    },
+    "offer": {
+      "headline": "Free buyer-fit read on one script in your slate",
+      "frontEndOffer": "Send one script you are weighing and we return a Scriptlens buyer-fit report within 48 hours: which buyers it suits, the three biggest development risks, and comparable recent deals.",
+      "proofPoints": [
+        "Layered feedback from working industry readers",
+        "Buyer-fit intelligence matched to current market buyers"
+      ],
+      "cta": "Worth sending one script over this week?",
+      "riskReversal": "No call needed, no card, report is yours to keep."
     }
   },
   "logs": {
@@ -803,6 +892,16 @@
       "creating Plusvibe DRAFT campaign…",
       "uploaded 11 verified leads",
       "draft only: a human must click Start"
+    ],
+    "offer": [
+      "reading intake offer + case studies…",
+      "drafting the front-end offer…",
+      "checking proof points against inputs…"
+    ],
+    "qualify": [
+      "scraping 12 homepages…",
+      "asking: \"Is this an independent film financier or producer?\"…",
+      "✓ qualified 11 · rejected 1"
     ]
   }
 }

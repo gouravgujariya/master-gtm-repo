@@ -54,6 +54,22 @@ export const Segment = z.object({
 export const Segments = z.object({ segments: z.array(Segment).length(6) });
 export type Segments = z.infer<typeof Segments>;
 
+// The campaign's front-end offer (video phase 6): copy is downstream of this and cannot rescue a weak one.
+export const Offer = z.object({
+  headline: z.string(),
+  frontEndOffer: z.string(),
+  proofPoints: strs,
+  cta: z.string(),
+  riskReversal: z.string().optional(),
+});
+export type Offer = z.infer<typeof Offer>;
+
+// AI qualification (video phase 10): one yes/no per company with a written reason a client can audit.
+export const Qualify = z.object({
+  results: z.array(z.object({ domain: z.string(), qualified: z.boolean(), reason: z.string() })),
+});
+export type Qualify = z.infer<typeof Qualify>;
+
 export const CopySequence = z.object({
   subject: z.string().regex(/^\S+(\s+\S+){1,2}$/, "subject must be 2-3 words"),
   sequence: z.array(z.object({ step: z.number().int(), waitDays: z.number().int(), body: z.string() })),

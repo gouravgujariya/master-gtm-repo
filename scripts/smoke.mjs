@@ -21,6 +21,11 @@ const me = (await call("GET", "/auth/me")).j; ok(me.demoMode === "on", "me + dem
 const cl = await call("POST", "/api/clients", { name: "Scriptlens", description: "AI video scripts" }); ok(cl.status === 201, "create client");
 const C = cl.j.id ?? cl.j.client?.id;
 ok((await call("POST", "/api/jobs", { clientId: C, type: "competitors" })).j?.error?.code === "GATE", "competitors gated before icp");
+ok((await call("POST", "/api/jobs", { clientId: C, type: "research" })).j?.error?.needs === "intake", "research gated before intake");
+ok((await approve(C, undefined, "intake")).j?.error?.code === "INTAKE_INCOMPLETE", "intake refused without offer + case study");
+ok((await call("PATCH", `/api/clients/${C}/intake`, { offer: "AI video scripts from $49", senderNames: "Sam" })).status === 200, "intake offer saved");
+ok((await call("POST", `/api/clients/${C}/files`, { kind: "case_study", filename: "case.md", contentText: "A studio cut script time in half." })).status === 201, "case study added");
+ok((await approve(C, undefined, "intake")).status < 300, "approve intake");
 await runJob(C, undefined, "research");
 ok((await approve(C, undefined, "icp")).status < 300, "approve icp");
 await runJob(C, undefined, "competitors");
@@ -33,8 +38,14 @@ const K = camp.j.id;
 ok((await call("POST", "/api/jobs", { clientId: C, campaignId: K, type: "source", input: { dataset: "saas", filters: {} } })).j?.error?.needs === "strategy", "source gated before strategy");
 ok((await approve(C, K, "strategy")).status < 300, "approve strategy");
 ok((await approve(C, K, "send")).status === 400, "send cannot be approved directly");
+ok((await call("POST", "/api/jobs", { clientId: C, campaignId: K, type: "source", input: { dataset: "saas", filters: {} } })).j?.error?.needs === "offer", "source gated before the offer");
+await runJob(C, K, "offer");
+ok((await approve(C, K, "offer")).status < 300, "approve offer (founder gate)");
 await runJob(C, K, "source", { dataset: "saas", filters: { industry: "software" } });
 ok((await approve(C, K, "companies")).status < 300, "approve companies");
+ok((await call("POST", "/api/jobs", { clientId: C, campaignId: K, type: "find" })).j?.error?.needs === "qualified", "find gated before qualify");
+await runJob(C, K, "qualify");
+ok((await approve(C, K, "qualified")).status < 300, "approve qualified");
 await runJob(C, K, "find", { titles: ["CEO"] });
 ok((await approve(C, K, "contacts")).status < 300, "approve contacts");
 const v = await runJob(C, K, "verify"); console.log("  counts", JSON.stringify(v.result.counts));
@@ -51,5 +62,5 @@ const sse = await fetch(`${B}/api/jobs/${d.j.jobId}/events`, { headers: { cookie
 ok(txt.includes("event: log") && txt.includes("event: status"), "SSE stream replays log + status");
 // re-approving an upstream stage revokes later ones
 await approve(C, K, "strategy");
-ok((await call("POST", "/api/jobs", { clientId: C, campaignId: K, type: "find" })).j?.error?.needs === "companies", "re-approving strategy revoked companies");
+ok((await call("POST", "/api/jobs", { clientId: C, campaignId: K, type: "find" })).j?.error?.needs === "qualified", "re-approving strategy revoked the later stages");
 console.log("SMOKE OK");

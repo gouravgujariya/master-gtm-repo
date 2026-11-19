@@ -7,6 +7,7 @@ import { approvals, campaigns, jobs } from "../db/schema.ts";
 import { AppError } from "../core/errors.ts";
 import { CLIENT_STAGES, PRODUCES, STAGES, laterStages, type JobType, type Stage } from "../core/gates.ts";
 import { body, need, type Env } from "./auth.ts";
+import { intakeStatus } from "./clients.ts";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -57,6 +58,10 @@ export const approvalRoutes = new Hono<Env>()
     if (b.campaignId) {
       const [camp] = await db.select().from(campaigns).where(and(eq(campaigns.id, b.campaignId), eq(campaigns.clientId, b.clientId)));
       need(camp, "Campaign");
+    }
+    if (b.stage === "intake" && b.decision === "approved") {
+      const { missing } = await intakeStatus(b.clientId);
+      if (missing.length) throw new AppError(409, "INTAKE_INCOMPLETE", `Intake needs ${missing.join(" and ")} before research can start`);
     }
     const producer = PRODUCER[b.stage];
     let snapshot: unknown = null;

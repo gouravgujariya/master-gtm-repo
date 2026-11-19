@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GTM Console Prototype</title>
+<title>GTM Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -160,7 +160,38 @@ td small{display:block;color:var(--faint);font-family:var(--mono);font-size:11px
 .demo{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:6px;z-index:45;font-size:12px}
 .demo button{border:0;background:#f1f1ee;border-radius:7px;padding:6px 10px;font-size:12px}
 .demo button.on{background:var(--ink);color:#fff}
+/* workflow additions: tracks, gates, intake, revisit, filters */
+.stepper{overflow-x:auto}
+.trk{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);font-weight:600;margin:0 2px 0 10px;white-space:nowrap}
+.trk:first-child{margin-left:0}
+.dot.on{outline:2px solid var(--green);outline-offset:2px}
+.sstep .lbl.link{cursor:pointer}
+.sstep .lbl.link:hover{color:var(--ink)}
+.gate{font-size:12px;color:var(--muted);text-align:right;margin-top:16px;line-height:1.5}
+.gate b{color:var(--ink);font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.viewing{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 14px;margin-bottom:14px;background:var(--amber-bg);border-color:#f1dfb8;font-size:13px}
+.intake{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.checks{display:grid;gap:9px;font-size:13px}
+.checks div{display:flex;gap:8px;align-items:center}
+.ck{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.ck.y{background:var(--green-bg);color:var(--green-ink)}.ck.n{background:var(--red-bg);color:var(--red)}.ck.o{background:#f1f1ee;color:var(--faint)}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:12.5px;transition:background .15s,border-color .15s}
+.drop.over{border-color:var(--green);background:var(--green-bg)}
+.flist div{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:12px;padding:0}
+.linkbtn.plain{text-decoration:none}
+.seg.add{border-style:dashed;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.seg.add h4{justify-content:center}
+.chips-f{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips-f button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}
+.chips-f button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.person.ex{opacity:.5}
+tr.no td{color:var(--faint)}
+.csv{text-decoration:none;font-size:12px;padding:8px 12px;display:inline-flex;align-items:center}
+.filetext{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;max-height:55vh;overflow:auto;background:#f7f7f4;border-radius:8px;padding:12px;margin:0}
 @media (max-width:900px){
+  .intake{grid-template-columns:1fr}
   #app{grid-template-columns:1fr}
   aside{display:none}
   .emails{grid-template-columns:1fr}
@@ -181,25 +212,24 @@ td small{display:block;color:var(--faint);font-family:var(--mono);font-size:11px
     <div class="links"><a href="#">Products ▾</a><a href="#">Pricing</a><a href="#">Affiliates</a><a href="#" id="navApp">Open console</a></div>
   </div>
   <div class="hero">
-    <div class="ticker"><b id="tick">182,406</b> verified leads for 12,980 companies</div>
-    <div class="ticker">$9 median cost per lead</div>
+    <div class="ticker">Internal console · your team approves every step</div>
     <h1>Get <em>1 to 3 hot leads</em><br>in 24 hours</h1>
-    <div class="chips"><span class="chip">No SDRs or email infra needed</span><span class="chip">🎁 Free trial credits</span></div>
+    <div class="chips"><span class="chip">Every email verified</span><span class="chip">Draft only — a human clicks Start</span></div>
     <div class="urlbox">
       <input id="url" placeholder="Paste your website, e.g. yourcompany.com" autocomplete="off">
       <button class="go" id="go" aria-label="Start">→</button>
       <div class="suggest card hidden" id="suggest"></div>
     </div>
     <span class="nosite" id="nosite">I don't have a website</span>
-    <p class="sub">Our AI agents research the market, sharpen your ICP, find high-intent prospects, write personalised emails, and stop at your approval before anything is sent.</p>
+    <p class="sub">Add the client's website and inputs. AI agents research the market, pick the angle, write the offer, find and qualify companies, verify every email and write the copy — and stop for your approval at every step.</p>
   </div>
   <div class="proof">
-    <h2>What our customers got out of it</h2>
+    <h2>How every campaign is run</h2>
     <div class="grid">
-      <div class="card"><div class="big">2.4%</div><div class="muted">avg. positive reply rate</div></div>
-      <div class="card"><div class="big">$2.60</div><div class="muted">cost per verified lead</div></div>
-      <div class="card"><div class="big">100%</div><div class="muted">emails verified before drafting</div></div>
-      <div class="card"><div class="big">6 steps</div><div class="muted">from website to draft campaign</div></div>
+      <div class="card"><div class="big">Inputs first</div><div class="muted">no research until the client's offer and a case study are in</div></div>
+      <div class="card"><div class="big">You approve</div><div class="muted">every step, with redo and edit — nothing moves on by itself</div></div>
+      <div class="card"><div class="big">Qualified</div><div class="muted">each company gets an AI yes/no with a written reason</div></div>
+      <div class="card"><div class="big">Draft only</div><div class="muted">every email verified; a human clicks Start in Plusvibe</div></div>
     </div>
   </div>
 </section>
@@ -263,6 +293,7 @@ function stream(jobId, onLog = (l) => { S.log.push(l); renderSide(); }) {
 /* ===================== State + helpers ===================== */
 const $ = (s) => document.querySelector(s);
 const S = { user: null, demoMode: "off", clients: [], clientId: null, campaignId: null, client: null, profile: {}, approvals: [], latestJobs: {}, camp: null,
+  intake: {}, files: [], kind: "case_study", view: null, editing: false, filter: "all", criterion: "",
   step: 0, done: 0, loading: false, error: null, busy: false, log: [], seg: 0, target: null, person: 0, tab: "emails", copyMethod: "default",
   auto: false, speed: 1, run: 0, es: null, autoT: 0 };
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -282,15 +313,42 @@ const FINDER_LABEL = { "agenticdata": "AgenticData", "ai-ark": "AI Ark", "coldiq
 const finderKey = (s) => FINDERS.find((f) => f.replace(/\W/g, "") === String(s || "").toLowerCase().replace(/[^a-z]/g, ""));
 
 /* ===================== Flow: one entry per step (job → approval stage → view) ===================== */
+// Same order as the GTM workflow and src/core/gates.ts STAGES. `gate` = what approving the step asserts;
+// `feedback` = an LLM step that can be redone with an operator note.
 const flow = [
-  { name: "Research your company", job: "research", stage: "icp", render: () => step1(), input: () => ({ website: S.client?.website || undefined }) },
-  { name: "Explore competitors", job: "competitors", stage: "competitors", render: () => step2() },
-  { name: "Define campaigns", job: "segments", stage: "strategy", render: () => step3() },
-  { name: "Find potential customers", job: "source", stage: "companies", campaign: true, render: () => step4(true), input: () => sourceInput(S.target || targetFromSeg(curSeg())) },
-  { name: "Find decision makers", job: "find", stage: "contacts", campaign: true, render: () => step5(true), input: () => ({ titles: list((S.target || targetFromSeg(curSeg())).titles) }) },
-  { name: "Write emails", job: ["verify", "copy"], stage: "copy", campaign: true, render: () => step6(), input: (t) => (t === "copy" ? { method: S.copyMethod } : {}) },
+  { key: "intake", track: "Strategy", name: "Client inputs", job: null, stage: "intake", approve: "Approve intake",
+    gate: "Offer and at least one case study are in. Copy can't be written without proof.", render: () => intakeView(), side: () => sideIntake() },
+  { key: "research", name: "Research company", job: "research", stage: "icp", feedback: true, approve: "Approve company profile",
+    gate: "The profile matches what the client told us.", doing: () => `Researching ${co().name || "the website"}…`,
+    render: () => step1(), input: () => ({ website: S.client?.website || undefined }), side: () => sideResearch() },
+  { key: "competitors", name: "Competitors", job: "competitors", stage: "competitors", feedback: true, approve: "Approve competitors",
+    gate: "These companies are excluded from every list we source.", doing: () => `Searching the market for products like ${co().name}…`,
+    render: () => step2(), side: () => sideCompetitors() },
+  { key: "angle", name: "Campaign angle", job: "segments", stage: "strategy", pick: true, feedback: true, approve: "Approve angle",
+    gate: "This segment runs first. Pick by reachable size: it's the highest-leverage decision in the build.",
+    doing: () => "Matching angles to buyers and counting reachable companies…", render: () => step3(), side: () => sideAngles() },
+  { key: "offer", name: "Front-end offer", job: "offer", stage: "offer", campaign: true, feedback: true, approve: "Founder signs off the offer",
+    gate: "Copy is downstream of the offer and cannot rescue a weak one.", doing: () => "Drafting the front-end offer from the client's real offer and case studies…",
+    render: () => offerView(), side: () => (offer().headline ? `<div class="scard">${esc(offer().headline)}</div>` : "") },
+  { key: "companies", track: "Data", name: "Find companies", job: "source", stage: "companies", campaign: true, redoLabel: "+ Source more",
+    approve: "Approve companies", gate: "Right companies, right size, no competitors, do-not-contact list applied.",
+    doing: () => "Searching the bulk lists first…", render: () => step4(true),
+    input: () => sourceInput(S.target || targetFromSeg(curSeg())), side: () => `<div class="muted" style="font-size:12px">${companies().length} companies · bulk list first</div>` },
+  { key: "qualify", name: "Qualify companies", job: "qualify", stage: "qualified", campaign: true, noRedo: true,
+    approve: "Approve qualified list", gate: "Every company has a written reason. Contacts are only found at qualified ones.",
+    doing: () => `Reading ${companies().length} websites and qualifying each one…`, render: () => qualifyView(),
+    input: () => (S.criterion.trim() ? { criterion: S.criterion.trim() } : {}),
+    side: () => `<div class="muted" style="font-size:12px">${companies().filter((c) => c.qualified === true).length} of ${companies().length} qualified</div>` },
+  { key: "contacts", name: "Decision makers", job: "find", stage: "contacts", campaign: true, redoLabel: "↻ Re-run finder",
+    approve: "Approve contacts", gate: "Right people, right seniority.", doing: () => `Finding the right people at the qualified companies…`,
+    render: () => step5(true), input: () => ({ titles: list((S.target || targetFromSeg(curSeg())).titles) }),
+    side: () => `<div class="muted" style="font-size:12px">${contacts().length} decision makers</div>` },
+  { key: "copy", name: "Verify & write emails", job: ["verify", "copy"], stage: "copy", campaign: true, feedback: true, approve: "Approve copy",
+    gate: "Every email is verified. The client approves the copy — it goes out under their name.",
+    doing: () => "Verifying every email with OptimaVerifier, then writing the emails…",
+    render: () => step6(), input: (t) => (t === "copy" ? { method: S.copyMethod } : {}) },
 ];
-const STEPS = flow.map((f) => f.name);
+const N = flow.length; // step N = launch (draft)
 
 // API data → view helpers
 const mine = (a) => !a.campaignId || a.campaignId === S.campaignId; // client-level ∪ this campaign
@@ -300,10 +358,10 @@ function approved(stage) {
   return last?.decision === "approved";
 }
 function jobOf(type) { // campaign steps read the campaign's own latest jobs
-  const f = flow.find((f) => [].concat(f.job).includes(type));
-  return (f.campaign ? S.camp?.latestJobs?.[type] : S.latestJobs[type]) || null;
+  const f = flow.find((f) => [].concat(f.job || []).includes(type));
+  return (f?.campaign ? S.camp?.latestJobs?.[type] : S.latestJobs[type]) || null;
 }
-const isDemo = (i) => [].concat(flow[i].job).some((t) => jobOf(t)?.result?.demo);
+const isDemo = (i) => [].concat(flow[i].job || []).some((t) => jobOf(t)?.result?.demo);
 const icp = () => S.profile?.icp || {};
 function co() {
   const i = icp(), c = S.client || {};
@@ -317,7 +375,9 @@ const segments = () => S.profile?.angles?.segments || [];
 const curSeg = () => (S.camp && segments().find((s) => s.name === S.camp.campaign.segment)) || segments()[S.seg] || {};
 const companies = () => S.camp?.companies || [];
 const contacts = () => S.camp?.contacts || [];
+const offer = () => S.camp?.campaign?.offer || {};
 const pname = (p) => [p.firstName, p.lastName].filter(Boolean).join(" ") || p.email;
+const kb = (n) => (n > 1024 ? `${Math.round(n / 1024)} KB` : `${n || 0} B`);
 
 function targetFromSeg(seg = {}) {
   const saved = S.camp?.campaign; // targeting edited earlier for this campaign survives reloads
@@ -373,7 +433,6 @@ async function loadClients() { S.clients = await api("/api/clients"); renderSide
     }
     requestAnimationFrame(frame);
   })();
-  setInterval(() => { const t = $("#tick"); t.textContent = (parseInt(t.textContent.replace(/,/g, "")) + 1).toLocaleString(); }, 2500);
 })();
 
 $("#url").addEventListener("input", (e) => {
@@ -407,7 +466,7 @@ async function createClient(body) {
 /* ===================== State machine (driven by the API) ===================== */
 async function refresh() {
   const d = await api(`/api/clients/${S.clientId}`);
-  Object.assign(S, { client: d.client, profile: d.profile || {}, approvals: d.approvals || [], latestJobs: d.latestJobs || {} });
+  Object.assign(S, { client: d.client, profile: d.profile || {}, approvals: d.approvals || [], latestJobs: d.latestJobs || {}, intake: d.intake || {}, files: d.files || [] });
   S.camp = S.campaignId ? await api(`/api/campaigns/${S.campaignId}`) : null;
   if (S.camp) { const k = segments().findIndex((s) => s.name === S.camp.campaign.segment); if (k >= 0) S.seg = k; }
 }
@@ -416,28 +475,35 @@ function setHash() { location.hash = new URLSearchParams(S.campaignId ? { client
 // Open (or resume) a client/campaign: the first unapproved stage is the current step.
 async function openClient(clientId, campaignId = null) {
   const run = ++S.run; S.es?.close(); clearTimeout(S.autoT);
-  Object.assign(S, { clientId, campaignId, log: [], error: null, loading: false, seg: 0, target: null, person: 0, tab: "emails", camp: null });
+  Object.assign(S, { clientId, campaignId, log: [], error: null, loading: false, seg: 0, target: null, person: 0, tab: "emails", camp: null,
+    view: null, editing: false, filter: "all", criterion: "" });
   setHash(); showApp(); render();
   await refresh();
   if (run !== S.run) return;
   const i = flow.findIndex((f) => !approved(f.stage));
-  S.done = i < 0 ? 6 : i;
-  if (i < 0) { S.step = 6; return render(); }
+  S.done = i < 0 ? N : i;
+  if (i < 0) { S.step = N; return render(); }
   await enter(i, run);
 }
 
 // Run the step's job(s) (or attach to the running one), then render it for approval.
-async function enter(i, run = S.run, retry = false) {
+// `redo` = {type, input}: force a fresh run of that job with extra input (operator feedback, a new question…).
+async function enter(i, run = S.run, retry = false, redo = null) {
   const f = flow[i];
-  Object.assign(S, { step: i, loading: true, error: null, log: [] });
+  Object.assign(S, { step: i, view: null, editing: false, loading: !!f.job, error: null, log: [] });
   render();
+  if (!f.job) { // intake: nothing runs, the operator adds the client's inputs (auto-play fills them in approve)
+    if (S.auto) S.autoT = setTimeout(() => run === S.run && quietly(approve(i)), 2600 / S.speed);
+    return;
+  }
   for (const type of [].concat(f.job)) {
-    const j = jobOf(type);
-    if (j?.status === "done") { S.log.push(...lines(j.log)); continue; }
-    if (j?.status === "error" && !retry) return fail(j.result?.error || lines(j.log).at(-1) || "Job failed");
+    const j = jobOf(type), again = redo?.type === type;
+    if (j?.status === "done" && !again) { S.log.push(...lines(j.log)); continue; }
+    if (j?.status === "error" && !retry && !again) return fail(j.result?.error || lines(j.log).at(-1) || "Job failed");
     let id = j?.id;
-    if (!j || ["error", "cancelled"].includes(j.status)) {
-      try { id = (await api("/api/jobs", { method: "POST", body: { clientId: S.clientId, campaignId: f.campaign ? S.campaignId : undefined, type, input: f.input?.(type) || {} } })).jobId; }
+    if (again || !j || ["error", "cancelled"].includes(j.status)) {
+      const input = { ...(f.input?.(type) || {}), ...(again ? redo.input : {}) };
+      try { id = (await api("/api/jobs", { method: "POST", body: { clientId: S.clientId, campaignId: f.campaign ? S.campaignId : undefined, type, input } })).jobId; }
       catch (e) { return run === S.run && fail(e.message); }
     }
     const d = await stream(id);
@@ -451,46 +517,74 @@ async function enter(i, run = S.run, retry = false) {
 }
 function fail(msg) { S.loading = false; S.error = msg; render(); }
 
+// Reject (with the operator's note, kept as an audit trail) and re-run the step's last job.
+async function redo(i, note = "", input = {}) {
+  const f = flow[i], type = [].concat(f.job).at(-1);
+  $("#overlay").classList.add("hidden");
+  if (note) { // best effort: a per-campaign stage can only be recorded once a campaign exists
+    const body = { clientId: S.clientId, stage: f.stage, decision: "rejected", note };
+    if (f.campaign || f.pick) body.campaignId = S.campaignId;
+    if (!(f.campaign || f.pick) || S.campaignId) await api("/api/approvals", { method: "POST", body, quiet: true }).catch(() => {});
+  }
+  if (f.pick) S.target = null;
+  S.done = Math.min(S.done, i);
+  await enter(i, ++S.run, true, { type, input: note ? { ...input, feedback: note } : input });
+}
+
 async function approve(i) {
   if (S.busy) return;
+  const f = flow[i];
+  if (f.key === "intake" && S.auto && S.intake.missing?.length) await demoIntake(); // auto-play started on this screen
+  if (f.key === "intake" && S.intake.missing?.length) return toast(`Intake needs ${S.intake.missing.join(" and ")} first.`);
+  if (f.key === "qualify" && !companies().some((c) => c.qualified === true)) return toast("No qualified companies — override some or re-run with a different question.");
   S.busy = true; clearTimeout(S.autoT);
+  let ok = false;
   try {
-    const f = flow[i], body = { clientId: S.clientId, stage: f.stage, decision: "approved" };
-    if (i === 2) { // strategy is per campaign: create it from the picked segment first
+    const body = { clientId: S.clientId, stage: f.stage, decision: "approved" };
+    if (f.pick) { // strategy is per campaign: create it from the picked segment first
       const seg = segments()[S.seg];
       if (!seg) return toast("Pick a campaign first.");
       const T = S.target || targetFromSeg(seg);
       if (T.dataset === "lookalike" && !T.reason.trim()) { if (!S.auto) return toast("Lookalike sourcing is paid — add a reason first."); T.reason = "demo auto-play"; }
       if (S.camp?.campaign.segment !== seg.name) {
         const c = await api(`/api/clients/${S.clientId}/campaigns`, { method: "POST", body: { name: `${seg.name} — ${co().name}`, angle: seg.angle || T.dataset, persona: seg.persona, segment: seg.name, targeting: T } });
-        S.campaignId = c.id; S.camp = { campaign: c, companies: [], contacts: [] }; setHash();
+        S.campaignId = c.id; S.camp = { campaign: c, companies: [], contacts: [], latestJobs: {} }; setHash();
       }
       S.target = T;
     }
-    if (f.campaign || i === 2) body.campaignId = S.campaignId;
+    if (f.campaign || f.pick) body.campaignId = S.campaignId;
     await api("/api/approvals", { method: "POST", body });
     await refresh(); quietly(loadClients());
-    S.done = i + 1;
-    if (i === flow.length - 1) { S.step = 6; S.log = []; render(); if (S.auto) openApprove(); return; }
-    await enter(i + 1);
-  } finally { S.busy = false; }
+    S.done = i + 1; ok = true;
+  } finally { S.busy = false; } // released before the next step renders, or its Approve button would stay disabled
+  if (!ok) return;
+  if (i === N - 1) { S.step = N; S.log = []; render(); if (S.auto) openApprove(); return; }
+  await enter(i + 1);
 }
 
 /* ===================== Render ===================== */
-function render() { renderStepper(); renderSide(); renderStage(); $("#banner").classList.toggle("hidden", !S.clientId || S.step < 6); }
+function render() { renderStepper(); renderSide(); renderStage(); $("#banner").classList.toggle("hidden", !S.clientId || S.step < N); }
 
 function renderStepper() {
-  const cur = Math.min(S.step, 5);
   let h = "";
-  for (let i = 0; i < 6; i++) {
-    if (i === cur && S.step < 6) h += `<span class="pill"><i></i>${i + 1} ${STEPS[i]}</span>`;
-    else h += `<span class="dot ${i < S.done ? "done" : ""}">${i + 1}</span>`;
-    if (i < 5) h += `<span class="bar ${i < S.done - 1 ? "done" : ""}"></span>`;
-  }
-  if (S.step >= 6) h += `<span class="pill"><i></i>6 Outreach ready</span>`;
-  h += `<div class="next"><div><span class="dot">7</span>Send emails</div><div><span class="dot">8</span>Book meetings</div><div><span class="dot">9</span>Learn &amp; double down</div></div>`;
+  flow.forEach((f, i) => {
+    if (f.track) h += `<span class="trk">${f.track}</span>`;
+    if (i === S.step && S.step < N) h += `<span class="pill"><i></i>${i + 1} ${esc(f.name)}</span>`;
+    else h += `<span class="dot ${i < S.done ? "done" : ""} ${S.view === i ? "on" : ""}" title="${esc(f.name)}" ${i < S.done ? `data-view="${i}"` : ""}>${i + 1}</span>`;
+    if (i < N - 1) h += `<span class="bar ${i < S.done - 1 ? "done" : ""}"></span>`;
+  });
+  h += `<span class="trk">Launch</span>` + (S.step >= N ? `<span class="pill"><i></i>Draft ready</span>` : `<span class="dot">${N + 1}</span>`);
+  h += `<div class="next"><div><span class="dot">·</span>Send emails</div><div><span class="dot">·</span>Book meetings</div><div><span class="dot">·</span>Learn &amp; double down</div></div>`;
   $("#stepper").innerHTML = h;
 }
+
+const sideIntake = () => `<div class="muted" style="font-size:12px">${S.files.filter((f) => f.kind !== "research").length} input files · offer ${S.intake.offer ? "✓" : "✗"} · case studies ${S.intake.caseStudies || 0}</div>`;
+const sideResearch = () => { const c = co(); return `<div class="scard"><b>${esc(c.name)}</b> <span class="muted mono">${esc(c.domain)}</span><div class="muted" style="margin-top:4px">${esc(c.desc)}</div></div>`; };
+function sideCompetitors() {
+  const comps = competitors();
+  return `<div class="sect" style="margin-top:4px">Competitors ${comps.length}</div><div class="comp-grid">${comps.slice(0, 8).map((x) => `<span>${esc(x)}</span>`).join("")}</div>${comps.length > 8 ? `<div class="muted" style="font-size:11px;margin-top:4px">+${comps.length - 8} more</div>` : ""}`;
+}
+const sideAngles = () => `<div class="sect" style="margin-top:4px">Campaigns ${segments().length}</div>${segments().map((s, k) => `<div class="camp ${k === S.seg ? "on" : ""}" data-camp="${k}"><span>${esc(s.icon || "")} ${esc(s.name)}</span>${reach(s)}</div>`).join("")}`;
 
 function renderSide() {
   let h = `<div class="logo"><i></i>GTM Console</div><div class="sect">Clients</div>`;
@@ -500,64 +594,125 @@ function renderSide() {
   }
   h += `<div class="camp" data-new>+ New client</div>`;
   if (S.clientId) {
-    const lbl = (i) => `<div class="lbl ${S.step === i && S.loading ? "on" : ""}">${i < S.done ? "✓" : "·"} step ${i + 1} · ${STEPS[i]}</div>`;
-    for (let i = 0; i <= Math.min(S.step, 5); i++) {
-      h += `<div class="sstep">${lbl(i)}`;
-      if (i < S.done) {
-        const c = co(), comps = competitors(), segs = segments();
-        if (i === 0) h += `<div class="scard"><b>${esc(c.name)}</b> <span class="muted mono">${esc(c.domain)}</span><div class="muted" style="margin-top:4px">${esc(c.desc)}</div></div>`;
-        if (i === 1) h += `<div class="sect" style="margin-top:4px">Competitors ${comps.length}</div><div class="comp-grid">${comps.slice(0, 8).map((x) => `<span>${esc(x)}</span>`).join("")}</div>${comps.length > 8 ? `<div class="muted" style="font-size:11px;margin-top:4px">+${comps.length - 8} more</div>` : ""}`;
-        if (i === 2) h += `<div class="sect" style="margin-top:4px">Campaigns ${segs.length}</div>${segs.map((s, k) => `<div class="camp ${k === S.seg ? "on" : ""}" data-camp="${k}"><span>${esc(s.icon || "")} ${esc(s.name)}</span><span>${esc(s.size || "")}</span></div>`).join("")}`;
-        if (i === 3) h += `<div class="muted" style="font-size:12px">${companies().length} companies matched · bulk list first</div>`;
-        if (i === 4) h += `<div class="muted" style="font-size:12px">${contacts().length} decision makers</div>`;
-      }
+    for (let i = 0; i <= Math.min(S.step, N - 1); i++) {
+      const done = i < S.done;
+      h += `<div class="sstep"><div class="lbl ${S.step === i && S.loading ? "on" : ""} ${done ? "link" : ""}" ${done ? `data-view="${i}" title="View this approved step"` : ""}>${done ? "✓" : "·"} ${i + 1} · ${esc(flow[i].name)}</div>`;
+      if (done && flow[i].side) h += flow[i].side();
       h += `</div>`;
     }
-    if (S.step < 6 && S.log.length) {
+    if (S.step < N && S.log.length) {
       const last = S.log.length - 1;
-      h += `<div class="log"><div class="head">● Agent ${S.loading ? "is working on" : "finished"} step ${S.step + 1} of 6</div>${S.log.map((l, k) => `<div class="${k === last ? "now" : ""}">${k === last && S.loading ? "›" : "✓"} ${esc(l)}${k === last && S.loading ? ' <span class="cursor"></span>' : ""}</div>`).join("")}</div>`;
+      h += `<div class="log"><div class="head">● Agent ${S.loading ? "is working on" : "finished"} step ${S.step + 1} of ${N}</div>${S.log.map((l, k) => `<div class="${k === last ? "now" : ""}">${k === last && S.loading ? "›" : "✓"} ${esc(l)}${k === last && S.loading ? ' <span class="cursor"></span>' : ""}</div>`).join("")}</div>`;
     }
   }
   h += `<div class="muted" style="font-size:11px;margin-top:18px">${esc(S.user?.email)} · <a href="#" data-logout>Log out</a></div>`;
   $("#side").innerHTML = h;
 }
 
-function continueBtn(label, extra = "") {
-  if (S.auto) return "";
-  return `<div class="cta-row">${extra}<button class="btn" data-continue ${S.busy ? "disabled" : ""}>${esc(label)} →</button></div>`;
+// Gate line + [Redo] [Approve]. Hidden in auto-play and when looking back at an approved step.
+function actionBar(extra = "") {
+  if (S.auto || S.view != null) return `<div id="abar"></div>`;
+  const i = S.step, f = flow[i], missing = f.key === "intake" ? S.intake.missing || [] : [];
+  const redoBtn = f.job && !f.noRedo ? `<button class="btn ghost" data-redo="${i}">${esc(f.redoLabel || "↻ Redo with feedback")}</button>` : "";
+  return `<div id="abar"><div class="gate">${missing.length ? `<b style="color:var(--red)">Missing: ${esc(missing.join(", "))}</b>` : `Approving means: <b>${esc(f.gate)}</b>`}</div>
+    <div class="cta-row">${extra}${redoBtn}<button class="btn" data-continue ${S.busy || missing.length ? "disabled" : ""}>${esc(f.approve)} →</button></div></div>`;
 }
+const refreshBar = () => { const a = $("#abar"); if (a) a.outerHTML = actionBar(); }; // intake only (no extra buttons)
 
 function renderStage() {
-  const i = S.step, st = $("#stage");
+  const st = $("#stage");
   if (!S.clientId) return (st.innerHTML = `<div class="center muted">Pick a client on the left, or start a new one.</div>`);
-  if (S.error) return (st.innerHTML = `<div class="center"><div class="card found fade"><div class="sect">Step ${i + 1} · ${esc(STEPS[i])} failed</div><p class="muted" style="line-height:1.6">${esc(S.error)}</p><div class="cta-row"><button class="btn" data-retry>Retry</button></div></div></div>`);
-  if (S.loading) return (st.innerHTML = loadingView(i));
-  const demo = (i >= 6 ? flow.some((_, k) => isDemo(k)) : isDemo(i)) ? `<span class="badge a demo-tag">DEMO DATA · fixture, not live</span>` : "";
-  st.innerHTML = demo + (i >= 6 ? finalView() : flow[i].render());
+  const i = S.view ?? S.step;
+  if (S.view == null && S.error) return (st.innerHTML = `<div class="center"><div class="card found fade"><div class="sect">Step ${i + 1} · ${esc(flow[i].name)} failed</div><p class="muted" style="line-height:1.6">${esc(S.error)}</p><div class="cta-row"><button class="btn" data-retry>Retry</button></div></div></div>`);
+  if (S.view == null && S.loading) return (st.innerHTML = loadingView(i));
+  const demo = (i >= N ? flow.some((_, k) => isDemo(k)) : isDemo(i)) ? `<span class="badge a demo-tag">DEMO DATA · fixture, not live</span>` : "";
+  const viewing = S.view == null ? "" : `<div class="card viewing fade"><span>Viewing approved step <b>${i + 1} · ${esc(flow[i].name)}</b></span><span style="display:flex;gap:8px"><button class="btn ghost" data-back>Back to current step</button>${flow[i].job ? `<button class="btn ghost" data-redo="${i}">↻ Re-open &amp; redo</button>` : ""}</span></div>`;
+  st.innerHTML = viewing + demo + (i >= N ? finalView() : flow[i].render());
 }
 
 function loadingView(i) {
-  const spin = (t) => `<div class="card found fade"><div style="display:flex;gap:10px;align-items:center"><span class="spin"></span> ${t}</div></div>`;
-  const cards = [
-    `<div class="card compare fade"><div class="box"><div class="muted" style="font-size:11px">With GTM Console</div><div class="price">$9</div><div class="muted" style="font-size:11px">per hot lead</div></div><span class="muted">vs</span><div class="box"><div class="muted" style="font-size:11px">Paid ads</div><div class="price muted">$94</div><div class="muted" style="font-size:11px">per B2B lead</div></div></div>`,
-    spin(`Searching the market for products like ${esc(co().name)}…`),
-    `<div class="card found fade"><div style="font-size:34px;font-weight:700;letter-spacing:-1px">14,417+</div><div class="muted">businesses ran outreach with GTM Console</div></div>`,
-    `<div class="card found fade"><div style="font-size:34px;font-weight:700;letter-spacing:-1px">150,000+</div><div class="muted">positive replies landed for our customers</div></div>`,
-    spin(`Finding the right people at ${companies().length} companies…`),
-    spin(`Verifying every email with OptimaVerifier, then writing the emails…`),
-  ];
-  return `<div class="center">${cards[i] || ""}</div>`;
+  const f = flow[i];
+  return `<div class="center"><div class="card found fade"><div class="sect">Step ${i + 1} of ${N} · ${esc(f.name)}</div>
+    <div style="display:flex;gap:10px;align-items:center;font-size:15px;line-height:1.5"><span class="spin" style="flex:none"></span><span>${esc(S.log.at(-1) || (f.doing ? f.doing() : "Working…"))}</span></div>
+    <div class="muted" style="font-size:12px;margin-top:10px">The live log is on the left. You review the result before anything moves on.</div></div></div>`;
 }
 
+/* ---------- step 1 · client inputs (the intake gate) ---------- */
+const KINDS = [["case_study", "Case study"], ["questionnaire", "Onboarding questionnaire"], ["transcript", "Call transcript"], ["dnc", "Do-not-contact list"], ["other", "Other notes"]];
+const KIND_LABEL = Object.fromEntries(KINDS);
+function intakeChecks() {
+  const I = S.intake || {}, n = (x, w) => (x ? `${x} ${w}${x > 1 ? "s" : ""}` : "");
+  const rows = [ // [ok, required, label, note when missing / count]
+    [I.offer, true, "Offer & pricing", "required"],
+    [I.caseStudies, true, "Case studies", n(I.caseStudies, "file") || "required · at least one"],
+    [I.questionnaire, false, "Onboarding questionnaire", n(I.questionnaire, "file") || "recommended"],
+    [I.transcripts, false, "Call transcripts", n(I.transcripts, "file") || "recommended"],
+    [I.bookingLink, false, "Booking link", I.bookingLink ? "" : "needed before launch"],
+    [I.senderNames, false, "Sender names", I.senderNames ? "" : "needed before launch"],
+    [I.dnc, false, "Do-not-contact list", n(I.dnc, "file") || "optional · skipped at sourcing"],
+  ];
+  return rows.map(([ok, req, label, note]) => `<div><span class="ck ${ok ? "y" : req ? "n" : "o"}">${ok ? "✓" : req ? "!" : "–"}</span><span>${label}</span><span class="muted" style="font-size:11.5px;margin-left:auto;text-align:right">${esc(note)}</span></div>`).join("");
+}
+function intakeView() {
+  const o = S.profile?.offer || {};
+  const fld = (k, label, ph, ta) => `<label class="fl">${label}${ta ? `<textarea class="in" rows="3" data-intake="${k}" placeholder="${esc(ph)}">${esc(o[k])}</textarea>` : `<input class="in" data-intake="${k}" value="${esc(o[k])}" placeholder="${esc(ph)}">`}</label>`;
+  const files = S.files.filter((f) => f.kind !== "research");
+  return `<div class="fade"><div class="muted" style="margin-bottom:12px;max-width:720px;line-height:1.6">Everything the client gave us: onboarding form, call transcripts, case studies. More context means better research, angles and copy. The build stops without an offer and at least one case study.</div>
+  <div class="intake">
+    <div class="card" style="padding:16px"><div class="sect">Checklist</div><div class="checks" id="checks">${intakeChecks()}</div></div>
+    <div class="card" style="padding:16px">
+      <div class="sect">Offer</div>${fld("offer", "What they sell and how it's priced (required)", "e.g. Website redesign · Package 1 $3,200 · Package 2 $4,200", true)}
+      <div class="tgrid">${fld("bookingLink", "Booking link", "https://cal.com/…")}${fld("senderNames", "Sender names", "e.g. Kunzah, Saeed")}</div>
+      <div class="sect" style="margin-top:8px">Client materials</div>
+      <div class="drop" id="drop">Drop .md, .txt or .csv files here, or <label class="linkbtn" style="cursor:pointer">browse<input type="file" id="fileIn" multiple accept=".md,.txt,.csv,.tsv,.json,text/*" hidden></label>
+        <div style="margin-top:8px">Save as <select class="in" style="width:auto;margin:0" data-kind>${KINDS.map(([v, l]) => `<option value="${v}" ${v === S.kind ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+        <div class="muted" style="font-size:11px;margin-top:6px">PDF or Word? Copy the text and paste it below.</div></div>
+      <details style="margin-top:10px"><summary class="muted" style="font-size:12px;cursor:pointer">Paste text instead</summary>
+        <form id="pasteForm"><label class="fl" style="margin-top:8px">Title<input class="in" name="filename" placeholder="e.g. Case study — Acme" required></label>
+        <textarea class="in" name="contentText" rows="6" required placeholder="Paste the questionnaire, transcript or case study"></textarea>
+        <div class="cta-row"><button class="btn ghost">Add</button></div></form></details>
+      <div class="flist" style="margin-top:12px">${files.map((f) => `<div><span class="chip">${esc(KIND_LABEL[f.kind] || f.kind)}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.filename)}</span><span class="muted mono" style="font-size:11px">${kb(f.size)}</span><button class="linkbtn" data-file="${esc(f.id)}">view</button><button class="linkbtn" data-delfile="${esc(f.id)}">remove</button></div>`).join("") || `<div class="muted">No files yet.</div>`}</div>
+    </div>
+  </div>${actionBar()}</div>`;
+}
+async function saveInput(kind, filename, contentText) {
+  const r = await api(`/api/clients/${S.clientId}/files`, { method: "POST", body: { kind, filename, contentText } });
+  S.files.push(r.file); S.intake = r.intake; renderStage(); renderSide();
+}
+async function addFiles(fileList) {
+  for (const file of fileList) {
+    if (!/\.(md|txt|csv|tsv|json)$/i.test(file.name) && !file.type.startsWith("text/")) { toast(`${file.name}: copy the text out of PDFs and Word files and paste it`); continue; }
+    const text = await file.text();
+    if (!text.trim()) { toast(`${file.name} is empty`); continue; }
+    if (text.length > 200000) { toast(`${file.name} is over 200k characters — split it`); continue; }
+    await saveInput(S.kind, file.name, text);
+  }
+}
+async function demoIntake() { // auto-play only: fill the two required items so the gate opens
+  if (!S.intake.offer) { const r = await api(`/api/clients/${S.clientId}/intake`, { method: "PATCH", body: { offer: "Demo offer: AI script coverage from $49 per script", bookingLink: "https://cal.com/demo", senderNames: "Demo Sender" } }); S.profile.offer = r.offer; S.intake = r.intake; }
+  if (!S.intake.caseStudies) await saveInput("case_study", "Demo case study.md", "Demo: an indie producer used buyer-fit reports to shortlist 3 of 40 scripts in one week.");
+}
+
+/* ---------- strategy steps ---------- */
 function step1() {
+  if (S.editing) return icpForm();
   const c = co(), chips = [c.year && `📅 ${c.year}`, c.emp && `👥 ${c.emp} emp`, c.geo].filter(Boolean);
   return `<div class="center"><div class="card found fade">
   <div style="display:flex;justify-content:space-between;align-items:start"><div><b style="font-size:15px">${esc(c.name)}</b><div class="muted mono" style="font-size:11px">${esc(c.domain)}</div></div><span class="badge g">✓ Found</span></div>
   <p class="muted" style="line-height:1.6">${esc(c.desc)}</p>
-  <div class="muted" style="font-size:12px;text-decoration:underline;cursor:pointer" data-edit>ⓘ Details look off?</div>
+  ${S.view == null ? `<button class="linkbtn" data-edit>✎ Details look off? Edit the profile</button>` : ""}
   <div style="display:flex;gap:6px;margin:10px 0;flex-wrap:wrap">${chips.map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>
   <div class="sect" style="margin-top:12px">Keywords</div><div class="kw">${[].concat(c.keywords).map((k) => `<span>${esc(k)}</span>`).join("")}</div>
-  ${continueBtn("Approve company profile")}</div></div>`;
+  ${actionBar()}</div></div>`;
+}
+function icpForm() {
+  const P = icp().icp || {}, j = (v) => [].concat(v || []).join(", ");
+  const inp = (k, label) => `<label class="fl">${label}<input class="in" name="${k}" value="${esc(j(P[k]))}"></label>`;
+  return `<div class="center"><form class="card found fade" id="icpForm" style="width:min(600px,100%)"><div class="sect">Edit company profile</div>
+    <label class="fl">Description<textarea class="in" name="description" rows="3">${esc(co().desc)}</textarea></label>
+    <label class="fl">Value proposition<textarea class="in" name="valueProp" rows="2">${esc(P.valueProp)}</textarea></label>
+    <div class="tgrid">${inp("titles", "Decision-maker titles")}${inp("industries", "Industries")}${inp("geographies", "Geographies")}${inp("seedDomains", "Case-study customer domains (lookalike seeds)")}</div>
+    <div class="cta-row"><button type="button" class="btn ghost" data-cancel-edit>Cancel</button><button class="btn">Save profile</button></div></form></div>`;
 }
 
 function step2() {
@@ -567,27 +722,47 @@ function step2() {
     <div class="muted" style="font-size:12px;line-height:1.6;margin:8px 0 14px">${(p.points || []).map((x) => `<div>${esc(x)}</div>`).join("")}</div>
     <div class="sect">Queries</div>${qs.map((q) => `<div class="q">🔍 ${esc(q)}</div>`).join("")}</div>
   <div><div class="sect">Competitors <span class="badge g">✓ ${comps.length} found</span></div><div class="clist">${comps.slice(0, 12).map((x) => `<div>${esc(x)}</div>`).join("")}</div>${comps.length > 12 ? `<div class="muted" style="text-align:center;font-size:12px">+${comps.length - 12} more</div>` : ""}</div>
-  <div style="grid-column:1/-1">${continueBtn("Approve competitors")}</div></div></div>`;
+  <div style="grid-column:1/-1">${actionBar()}</div></div></div>`;
 }
 
+// Reachable size from the bulk lists: under 5k thin · 5k–50k ideal · over 200k split it.
+function reach(s) {
+  const n = s.reachable, k = (x) => (x >= 1000 ? `${(Math.round(x / 100) / 10).toString()}K` : String(x));
+  if (n == null) return `<span class="badge n" title="AI estimate — not counted in the bulk lists">~${esc(s.sizeEstimate || s.size || "?")}</span>`;
+  if (n < 5000) return `<span class="badge a" title="Under 5k reachable: too thin to stand alone">${k(n)} · thin</span>`;
+  if (n <= 50000) return `<span class="badge g" title="5k–50k reachable: ideal, recyclable every two months">${k(n)} · ideal</span>`;
+  if (n <= 200000) return `<span class="badge n" title="Reachable in the bulk lists">${k(n)}</span>`;
+  return `<span class="badge r" title="Over 200k reachable: too broad — split it">200K+ · split it</span>`;
+}
 function step3() {
   const segs = segments();
-  if (!segs.length) return `<div class="center muted">No campaign ideas came back — retry the step.</div>`;
+  if (!segs.length) return `<div class="center muted">No campaign ideas came back — redo the step.</div>`;
   const seg = segs[S.seg] || segs[0], T = (S.target ||= targetFromSeg(seg));
-  return `<div class="fade"><div class="muted" style="margin-bottom:12px">Pick the campaign to run first — you can test several angles.</div>
+  const add = S.view == null ? `<div class="card seg add" data-add-angle><h4>+ Add your own angle</h4><p>The client's own strategy or a variation to test, run alongside the standard angles.</p></div>` : "";
+  return `<div class="fade"><div class="muted" style="margin-bottom:12px">Pick the campaign to run first — you can test several angles. Sizes are counted in the bulk lists.</div>
   <div class="segs">${segs.map((s, k) => `<div class="card seg ${k === S.seg ? "on" : ""}" data-camp="${k}">
-    <h4><span>${esc(s.icon || "")} ${esc(s.name)}</span><span class="badge n">${esc(s.size || "")}</span></h4><p>${esc(s.desc || s.description)}</p>
+    <h4><span>${esc(s.icon || "")} ${esc(s.name)}</span>${reach(s)}</h4><p>${esc(s.desc || s.description)}</p>
     <div class="sect">Pain</div><p>${esc(s.pain)}</p><div class="sect">Criteria</div><ul>${(s.criteria || []).map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
-    <div class="ex">${(s.examples || s.ex || []).map((e) => `<span>${esc(e)}</span>`).join("")}</div></div>`).join("")}</div>
+    <div class="ex">${(s.examples || s.ex || []).map((e) => `<span>${esc(e)}</span>`).join("")}</div></div>`).join("")}${add}</div>
   ${targetForm(seg, T)}
-  ${continueBtn("Approve strategy: " + seg.name)}</div>`;
+  ${actionBar()}</div>`;
+}
+function openAngle() {
+  modal(`<h3>Add your own angle</h3><div class="muted" style="margin-bottom:12px">The client's own strategy, run alongside the standard angles.</div>
+  <form id="angleForm"><label class="fl">Name<input class="in" name="name" required placeholder="e.g. Agencies hiring their first SDR"></label>
+  <label class="fl">Who it targets and why now<textarea class="in" name="desc" rows="2" required></textarea></label>
+  <label class="fl">Pain it hits<input class="in" name="pain"></label>
+  <label class="fl">Qualification criteria (comma separated)<input class="in" name="criteria" placeholder="B2B, 10-50 staff, sells a service"></label>
+  <label class="fl">Decision-maker titles<input class="in" name="titles" placeholder="Founder, CEO"></label>
+  <div class="cta-row"><button type="button" class="btn ghost" data-close>Cancel</button><button class="btn">Add angle</button></div></form>`);
 }
 
 // Becomes the `source` job input (and `find` titles).
 function targetForm(seg, T) {
-  const inp = (k, label, ph = "") => `<label class="fl">${label}<input class="in" data-t="${k}" value="${esc(T[k])}" placeholder="${ph}"></label>`;
+  const ro = S.view != null ? "disabled" : "";
+  const inp = (k, label, ph = "") => `<label class="fl">${label}<input class="in" data-t="${k}" value="${esc(T[k])}" placeholder="${ph}" ${ro}></label>`;
   return `<div class="card fade" style="padding:16px;margin-top:14px"><div class="sect">Targeting · ${esc(seg.name)}</div><div class="tgrid">
-    <label class="fl">Dataset<select class="in" data-t="dataset">${["saas", "local", "lookalike"].map((d) => `<option ${d === T.dataset ? "selected" : ""}>${d}</option>`).join("")}</select></label>
+    <label class="fl">Dataset<select class="in" data-t="dataset" ${ro}>${["saas", "local", "lookalike"].map((d) => `<option ${d === T.dataset ? "selected" : ""}>${d}</option>`).join("")}</select></label>
     ${T.dataset === "local" ? inp("category", "Business category", "e.g. dentist") + inp("state", "State", "e.g. TX")
       : inp("industry", "Industry", "e.g. software") + inp("location", "Location", "e.g. United States") + inp("size", "Company size", "e.g. 11-50")}
     ${inp("titles", "Decision-maker titles", "Founder, CEO")}${inp("seedDomains", "Seed domains", "lookalike seeds")}${inp("limit", "Max companies")}
@@ -595,21 +770,55 @@ function targetForm(seg, T) {
   </div></div>`;
 }
 
-const step4 = (btn) => `<div class="card fade" style="overflow:auto"><table><thead><tr><th>Company</th><th>Industry</th><th>Location</th><th>Size</th><th>Source</th></tr></thead><tbody>
+function offerView() {
+  const o = offer(), ro = S.view != null ? "readonly" : "";
+  const f = (k, label, rows) => `<label class="fl">${label}<textarea class="in" rows="${rows}" data-offer="${k}" ${ro}>${esc(k === "proofPoints" ? (o[k] || []).join("\n") : o[k])}</textarea></label>`;
+  return `<div class="center"><div class="card fade" style="width:min(640px,100%);padding:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="sect" style="margin:0">Front-end offer · ${esc(S.camp?.campaign?.segment || "")}</div><span class="badge a">Founder gate</span></div>
+    ${f("headline", "Headline", 1)}${f("frontEndOffer", "The offer: what they get, and by when", 3)}${f("proofPoints", "Proof points: one per line, only from the client's case studies", 3)}${f("cta", "Call to action", 1)}${f("riskReversal", "Risk reversal (optional)", 1)}
+    ${ro ? "" : `<div class="muted" style="font-size:11.5px">Edits save automatically.</div>`}${actionBar()}</div></div>`;
+}
+
+/* ---------- data steps ---------- */
+const csv = (what) => (S.campaignId ? `<a class="btn ghost csv" href="${API}/api/campaigns/${esc(S.campaignId)}/export?what=${what}">⬇ CSV</a>` : "");
+function skippedLine() {
+  const e = Object.entries(jobOf("source")?.result?.skipped || {});
+  return e.length ? `<div class="muted" style="font-size:12px;margin-bottom:8px">Skipped ${e.reduce((a, [, n]) => a + n, 0)}: ${e.map(([k, n]) => `${n} ${esc(k)}`).join(" · ")}</div>` : "";
+}
+const step4 = (btn) => `${skippedLine()}<div class="card fade" style="overflow:auto"><table><thead><tr><th>Company</th><th>Industry</th><th>Location</th><th>Size</th><th>Source</th></tr></thead><tbody>
   ${companies().map((c) => `<tr><td><b>${esc(c.companyName || c.domain)}</b><small>${esc(c.domain)}</small></td><td class="muted">${esc(c.industry)}</td><td>${esc(c.location)}</td><td>${esc(c.companySize)}</td><td>${c.listSource ? `<span class="chip">${esc(c.listSource)}</span>` : ""}</td></tr>`).join("") || `<tr><td colspan="5" class="muted">No companies matched.</td></tr>`}
-  </tbody></table></div>${btn ? continueBtn("Approve companies") : ""}`;
+  </tbody></table></div>${btn ? actionBar(csv("companies")) : ""}`;
+
+function qualifyView() {
+  const cs = companies(), q = cs.filter((c) => c.qualified === true).length, r = cs.filter((c) => c.qualified === false).length, u = cs.length - q - r;
+  const job = jobOf("qualify"), asked = job?.input?.criterion || (job?.log || "").match(/asking: "([^"]+)"/i)?.[1] || "";
+  const ro = S.view != null;
+  const verdict = (c) => (c.qualified === true ? `<span class="badge g">✓ qualified</span>` : c.qualified === false ? `<span class="badge r">✗ rejected</span>` : `<span class="badge n">? unchecked</span>`);
+  return `<div class="fade">
+  <div class="card" style="padding:14px 16px;margin-bottom:12px"><div class="sect">Qualification question</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><input class="in" style="margin:0;flex:1;min-width:220px" data-criterion value="${esc(S.criterion || asked)}" placeholder="Is this a <target> that <condition>?" ${ro ? "readonly" : ""}>
+    ${ro ? "" : `<button class="btn ghost" data-requalify>↻ Re-run with this question</button>`}</div></div>
+  <div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="badge g">${q} qualified</span><span class="badge r">${r} rejected</span>${u ? `<span class="badge n">${u} unchecked</span>` : ""}
+    <span class="muted" style="font-size:12px">Contacts are only found at qualified companies.${ro ? "" : " Click a verdict to override it."}</span></div>
+  <div class="card" style="overflow:auto"><table><thead><tr><th>Company</th><th>Verdict</th><th>Reason</th></tr></thead><tbody>
+  ${cs.map((c) => `<tr class="${c.qualified === true ? "" : "no"}"><td><b>${esc(c.companyName || c.domain)}</b><small>${esc(c.domain)}</small></td><td><button class="linkbtn plain" data-qual="${esc(c.id)}" ${ro ? "disabled" : ""} aria-label="Toggle verdict">${verdict(c)}</button></td><td class="muted">${esc(c.qualifyReason)}</td></tr>`).join("") || `<tr><td colspan="3" class="muted">No companies.</td></tr>`}
+  </tbody></table></div>${actionBar(csv("companies"))}</div>`;
+}
 
 const li = (p) => (/^https?:\/\//.test(p.linkedinUrl || "") ? `<a class="li" href="${esc(p.linkedinUrl)}" target="_blank" rel="noopener">in</a>` : "");
 const copyPick = () => `<select class="in" style="width:auto;margin:0" data-copymethod>${[["default", "Copy: Eric's rules (company+persona)"], ["braun", "Copy: Braun / Poke-the-Bear"]].map(([v, l]) => `<option value="${v}" ${v === S.copyMethod ? "selected" : ""}>${l}</option>`).join("")}</select>`;
 const step5 = (btn) => `<div class="card fade" style="overflow:auto"><table><thead><tr><th>Name</th><th>Job title</th><th>Company</th><th>Found via</th></tr></thead><tbody>
   ${contacts().map((p) => `<tr><td><span class="av">${esc(initials(pname(p)))}</span>${esc(pname(p))}${li(p)}</td><td>${esc(p.title)}</td><td class="mono" style="font-size:12px">${esc(p.companyDomain || p.companyName)}</td><td>${esc(FINDER_LABEL[finderKey(p.findSource)] || p.findSource)}</td></tr>`).join("") || `<tr><td colspan="4" class="muted">No decision makers found.</td></tr>`}
-  </tbody></table></div>${btn ? continueBtn("Approve contacts", copyPick()) : ""}`;
+  </tbody></table></div>${btn ? actionBar(csv("contacts") + copyPick()) : ""}`;
 
+// sendable · held (catch-all/unknown/not yet verified) · dropped (invalid) · excluded (by the operator)
+const vstate = (p) => (p.leadStatus === "excluded" ? "excluded" : p.sendable ? "sendable" : /invalid|bounce|disposable|spam/i.test(p.emailStatus || "") ? "dropped" : "held");
 function verdict(p) { // OptimaVerifier result from the verify job
   const note = p.verifyNote ? ` · ${esc(p.verifyNote)}` : "";
+  if (p.leadStatus === "excluded") return `<span class="badge n">excluded by you</span>`;
   if (!p.emailStatus) return `<span class="badge n">not verified yet</span>`;
   if (p.sendable) return `<span class="badge g">✓ ${esc(p.emailStatus)}${note}</span>`;
-  if (/invalid|bounce|disposable|spam/i.test(p.emailStatus)) return `<span class="badge r">${esc(p.emailStatus)} · dropped${note}</span>`;
+  if (vstate(p) === "dropped") return `<span class="badge r">${esc(p.emailStatus)} · dropped${note}</span>`;
   return `<span class="badge a">${esc(p.emailStatus)} · held${note}</span>`;
 }
 
@@ -617,48 +826,55 @@ function personCard(p, k) {
   const key = finderKey(p.findSource), hit = FINDERS.indexOf(key);
   const chips = FINDERS.map((f, j) => (j < hit ? `<span class="f miss">${FINDER_LABEL[f]}</span>` : j === hit ? `<span class="f hit">✓ ${FINDER_LABEL[f]}</span>` : `<span class="f">${FINDER_LABEL[f]}</span>`)).join("")
     + (hit < 0 && p.findSource ? `<span class="f hit">✓ ${esc(p.findSource)}</span>` : "");
-  return `<div class="card person ${k === S.person ? "on" : ""}" data-person="${k}"><div style="display:flex;align-items:center"><span class="av">${esc(initials(pname(p)))}</span><div><b>${esc(pname(p))}</b><div class="muted" style="font-size:11.5px">${esc(p.title)} · ${esc(p.companyDomain)}</div></div></div>
+  return `<div class="card person ${k === S.person ? "on" : ""} ${p.leadStatus === "excluded" ? "ex" : ""}" data-person="${k}"><div style="display:flex;align-items:center"><span class="av">${esc(initials(pname(p)))}</span><div><b>${esc(pname(p))}</b><div class="muted" style="font-size:11.5px">${esc(p.title)} · ${esc(p.companyDomain)}</div></div></div>
     <div class="finders">${chips}</div><div class="res">${esc(p.email)}${p.findSource ? ` via ${esc(FINDER_LABEL[key] || p.findSource)}` : ""}</div><div style="margin-top:5px">${verdict(p)}</div></div>`;
 }
 
 function editor() {
   const p = contacts()[S.person];
   if (!p) return `<div class="card editor muted">No contacts yet.</div>`;
-  const seq = S.camp.campaign.sequence || {};
+  const seq = S.camp.campaign.sequence || {}, ex = p.leadStatus === "excluded";
+  const status = ex ? '<span class="badge n">excluded — not drafted</span>' : p.sendable ? '<span class="badge g">sendable</span>' : '<span class="badge a">not sendable — excluded from draft</span>';
   return `<div class="card editor">
-    <div style="display:flex;align-items:center;margin-bottom:8px"><span class="av">${esc(initials(pname(p)))}</span><div><b>${esc(pname(p))}</b>${li(p)}<div class="muted" style="font-size:12px">${esc(p.title)} · ${esc(p.companyDomain)}</div></div></div>
+    <div style="display:flex;align-items:center;margin-bottom:8px"><span class="av">${esc(initials(pname(p)))}</span><div style="flex:1"><b>${esc(pname(p))}</b>${li(p)}<div class="muted" style="font-size:12px">${esc(p.title)} · ${esc(p.companyDomain)}</div></div>
+      <button class="btn ghost" style="font-size:12px;padding:6px 10px" data-exclude="${esc(p.id)}">${ex ? "Include in draft" : "Exclude from draft"}</button></div>
     <div class="meta"><span>To</span><span>${esc(p.email)}</span></div>
     <div class="meta"><span>Subj</span><b contenteditable="true" style="outline:none" data-subject>${esc(seq.subject)}</b></div>
     <div class="body" contenteditable="true" data-body="${esc(p.id)}">${esc(p.personalization?.body)}</div>
     ${(seq.sequence || []).slice(1).map((fu, k) => `<div class="sect" style="margin-top:6px">Follow-up ${k + 1}${fu.waitDays ? ` · +${esc(fu.waitDays)} days` : ""} · shared</div><div class="body" style="min-height:0" contenteditable="true" data-fu="${k + 1}">${esc(fu.body)}</div>`).join("")}
     <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:12px">
-      <span class="muted" style="font-size:11px">Click the text to edit · ${p.sendable ? '<span class="badge g">sendable</span>' : '<span class="badge a">not sendable — excluded from draft</span>'}</span>
-      ${S.step >= 6 ? `<button class="btn green" data-approve>✉ Create draft</button>` : ""}</div></div>`;
+      <span class="muted" style="font-size:11px">Click the text to edit · ${status}</span>
+      ${S.step >= N ? `<button class="btn green" data-approve>✉ Create draft</button>` : ""}</div></div>`;
 }
 
-const step6 = () => `<div class="emails"><div class="plist">${contacts().map(personCard).join("")}</div>${editor()}</div>${continueBtn("Approve copy")}`;
+const FILTERS = [["all", "All"], ["sendable", "Sendable"], ["held", "Held"], ["dropped", "Dropped"], ["excluded", "Excluded"]];
+function emailsPane() {
+  const ps = contacts(), n = (k) => (k === "all" ? ps.length : ps.filter((p) => vstate(p) === k).length);
+  const shown = ps.map((p, k) => [p, k]).filter(([p]) => S.filter === "all" || vstate(p) === S.filter);
+  return `<div class="chips-f">${FILTERS.map(([k, l]) => `<button class="${S.filter === k ? "on" : ""}" data-filter="${k}">${l} ${n(k)}</button>`).join("")}</div>
+  <div class="emails"><div class="plist">${shown.map(([p, k]) => personCard(p, k)).join("") || `<div class="muted" style="padding:10px">None here.</div>`}</div>${editor()}</div>`;
+}
+const step6 = () => emailsPane() + actionBar();
 
-function counts() {
-  const c = jobOf("verify")?.result?.counts;
-  if (c) return c;
-  const ps = contacts(), sendable = ps.filter((p) => p.sendable).length, dropped = ps.filter((p) => /invalid|bounce/i.test(p.emailStatus || "")).length;
-  return { sendable, dropped, held: ps.length - sendable - dropped };
+function counts() { // what the draft will contain: excluded leads never count
+  const st = contacts().map(vstate), c = (k) => st.filter((s) => s === k).length;
+  return { sendable: c("sendable"), held: c("held"), dropped: c("dropped"), excluded: c("excluded") };
 }
 
 function finalView() {
   const tabs = `<div class="tabs">${["companies", "people", "emails"].map((t) => `<button class="${S.tab === t ? "on" : ""}" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("")}</div>`;
   const head = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">${tabs}<div class="card" style="display:flex;gap:14px;align-items:center;padding:8px 10px"><div><b style="font-size:12px">${counts().sendable} verified leads</b><div class="muted" style="font-size:11px">Draft only · you click Start</div></div><button class="btn green" data-approve>Create draft</button></div></div>`;
-  if (S.tab === "companies") return head + step4(false);
-  if (S.tab === "people") return head + step5(false);
-  return head + `<div class="emails"><div class="plist">${contacts().map(personCard).join("")}</div>${editor()}</div>`;
+  if (S.tab === "companies") return head + step4(false) + `<div class="cta-row">${csv("companies")}</div>`;
+  if (S.tab === "people") return head + step5(false) + `<div class="cta-row">${csv("contacts")}</div>`;
+  return head + emailsPane();
 }
 
 /* ===================== Draft modal (DRAFT only — a human clicks Start) ===================== */
 function openApprove() {
   const n = counts();
   modal(`<h3>Create draft campaign</h3><div class="muted">${esc(S.camp?.campaign?.name)} · ${esc(co().name)}</div>
-    <div class="stats"><div class="card"><b style="color:var(--green)">${n.sendable}</b><span class="muted" style="font-size:12px">verified · will be drafted</span></div><div class="card"><b style="color:var(--amber)">${n.held}</b><span class="muted" style="font-size:12px">held for re-check</span></div><div class="card"><b class="muted">${n.dropped}</b><span class="muted" style="font-size:12px">no email / invalid</span></div></div>
-    <div class="rule">✓ Every email verified with OptimaVerifier<br>✓ Only verified leads are uploaded<br>✓ Campaign is created as a <b>DRAFT</b> in Plusvibe. A human must click <b>Start</b>.</div>
+    <div class="stats"><div class="card"><b style="color:var(--green)">${n.sendable}</b><span class="muted" style="font-size:12px">verified · will be drafted</span></div><div class="card"><b style="color:var(--amber)">${n.held}</b><span class="muted" style="font-size:12px">held for re-check</span></div><div class="card"><b class="muted">${n.dropped + n.excluded}</b><span class="muted" style="font-size:12px">invalid${n.excluded ? ` · ${n.excluded} excluded by you` : ""}</span></div></div>
+    <div class="rule">✓ Every email verified with OptimaVerifier<br>✓ Only verified leads are uploaded${n.excluded ? " — leads you excluded are left out" : ""}<br>✓ Campaign is created as a <b>DRAFT</b> in Plusvibe. A human must click <b>Start</b>.</div>
     <div class="cta-row"><button class="btn ghost" data-close>Cancel</button><button class="btn green" data-draft>Create draft in Plusvibe</button></div>`);
 }
 async function createDraft() {
@@ -676,35 +892,76 @@ async function createDraft() {
   } catch (e) { modal(`<h3>Draft failed</h3><p class="muted">${esc(e.message)}</p>${close}`); }
 }
 
-async function editDesc() {
-  const v = prompt("Correct the company description:", co().desc);
-  if (!v) return;
-  S.profile = await api(`/api/clients/${S.clientId}/profile`, { method: "PATCH", body: { icp: { ...icp(), description: v } } });
-  render();
+function openRedo(i) {
+  const f = flow[i], later = i < S.done;
+  if (!f.feedback) {
+    if (later && !confirm(`Re-running “${f.name}” re-opens every step after it. Continue?`)) return;
+    return quietly(redo(i));
+  }
+  modal(`<h3>Redo · ${esc(f.name)}</h3><div class="muted" style="margin-bottom:12px;line-height:1.5">Say what's wrong and the agent re-runs this step with your note.${later ? " Approving it again re-opens every later step." : ""}</div>
+  <form id="redoForm" data-i="${i}"><label class="fl">What should change?<textarea class="in" name="note" rows="4" required placeholder="e.g. They sell to clinics, not hospitals. Drop the enterprise persona."></textarea></label>
+  <div class="cta-row"><button type="button" class="btn ghost" data-close>Cancel</button><button class="btn">↻ Redo step</button></div></form>`);
 }
 
 /* ===================== Events ===================== */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-continue],[data-camp],[data-person],[data-tab],[data-approve],[data-close],[data-draft],[data-edit],[data-open],[data-new],[data-logout],[data-retry]");
-  if (!t) return;
+  const t = e.target.closest("[data-continue],[data-camp],[data-person],[data-tab],[data-approve],[data-close],[data-draft],[data-edit],[data-cancel-edit],[data-open],[data-new],[data-logout],[data-retry],[data-view],[data-back],[data-redo],[data-filter],[data-exclude],[data-qual],[data-requalify],[data-file],[data-delfile],[data-add-angle]");
+  if (!t || t.disabled) return;
   const d = t.dataset;
   if (d.continue !== undefined) quietly(approve(S.step));
-  if (d.camp !== undefined && S.step === 2) { S.seg = +d.camp; S.target = null; renderSide(); renderStage(); }
+  if (d.camp !== undefined && flow[S.step]?.pick && S.view == null) { S.seg = +d.camp; S.target = null; renderSide(); renderStage(); }
   if (d.person !== undefined) { S.person = +d.person; renderStage(); }
   if (d.tab) { S.tab = d.tab; renderStage(); }
   if (d.approve !== undefined) openApprove();
   if (d.close !== undefined) $("#overlay").classList.add("hidden");
   if (d.draft !== undefined) createDraft();
-  if (d.edit !== undefined) quietly(editDesc());
+  if (d.edit !== undefined) { S.editing = true; renderStage(); }
+  if (d.cancelEdit !== undefined) { S.editing = false; renderStage(); }
   if (d.open) quietly(openClient(d.open, d.openCamp || null));
   if (d.new !== undefined) showLanding();
   if (d.retry !== undefined) quietly(enter(S.step, S.run, true));
+  if (d.view !== undefined) { const i = +d.view; S.view = i === S.step ? null : i; S.editing = false; render(); }
+  if (d.back !== undefined) { S.view = null; render(); }
+  if (d.redo !== undefined) openRedo(+d.redo);
+  if (d.filter) { S.filter = d.filter; renderStage(); }
+  if (d.addAngle !== undefined) openAngle();
+  if (d.requalify !== undefined) quietly(redo(S.step, "", { criterion: S.criterion.trim() || $("[data-criterion]")?.value.trim() || undefined }));
+  if (d.exclude) quietly((async () => {
+    const p = contacts().find((c) => String(c.id) === d.exclude), status = p.leadStatus === "excluded" ? "selected" : "excluded";
+    await api(`/api/campaigns/${S.campaignId}/leads/${d.exclude}`, { method: "PATCH", body: { status } });
+    p.leadStatus = status; renderStage();
+  })());
+  if (d.qual) quietly((async () => {
+    const c = companies().find((x) => String(x.id) === d.qual);
+    Object.assign(c, await api(`/api/campaigns/${S.campaignId}/companies/${d.qual}`, { method: "PATCH", body: { qualified: c.qualified !== true } }));
+    renderStage(); renderSide();
+  })());
+  if (d.file) quietly(api(`/api/clients/${S.clientId}/files/${d.file}`).then((f) =>
+    modal(`<h3>${esc(f.filename)}</h3><div class="muted" style="margin-bottom:10px">${esc(KIND_LABEL[f.kind] || f.kind)}</div><pre class="filetext">${esc(f.contentText)}</pre><div class="cta-row"><button class="btn" data-close>Close</button></div>`)));
+  if (d.delfile && confirm("Remove this file from the client's inputs?")) quietly(api(`/api/clients/${S.clientId}/files/${d.delfile}`, { method: "DELETE" }).then((r) => {
+    S.files = S.files.filter((f) => f.id !== d.delfile); S.intake = r.intake; renderStage(); renderSide();
+  }));
   if (d.logout !== undefined) { e.preventDefault(); quietly(api("/auth/logout", { method: "POST" }).then(() => { showLanding(); showLogin(); })); }
 });
 document.addEventListener("input", (e) => {
   const d = e.target.dataset;
   if (d.t) { S.target[d.t] = e.target.value; if (d.t === "dataset") renderStage(); }
   if (d.copymethod !== undefined) S.copyMethod = e.target.value;
+  if (d.kind !== undefined) S.kind = e.target.value;
+  if (d.criterion !== undefined) S.criterion = e.target.value;
+  if (d.intake) { // intake facts: save quietly, then refresh only the checklist + gate (keeps focus while typing)
+    (S.profile.offer ||= {})[d.intake] = e.target.value;
+    debounce("intake", () => quietly(api(`/api/clients/${S.clientId}/intake`, { method: "PATCH", body: { [d.intake]: e.target.value } }).then((r) => {
+      S.profile.offer = r.offer; S.intake = r.intake;
+      const c = $("#checks"); if (c) c.innerHTML = intakeChecks();
+      refreshBar(); renderSide();
+    })));
+  }
+  if (d.offer) { // front-end offer: edits save; the server re-opens the offer gate if it was approved
+    const c = S.camp.campaign, o = (c.offer = { ...c.offer });
+    o[d.offer] = d.offer === "proofPoints" ? lines(e.target.value).map((x) => x.trim()).filter(Boolean) : e.target.value;
+    debounce("offer", () => quietly(api(`/api/campaigns/${S.campaignId}`, { method: "PATCH", body: { offer: o } })));
+  }
   if (d.body) { // per-lead email body
     const p = contacts().find((c) => String(c.id) === d.body);
     p.personalization = { ...p.personalization, body: e.target.innerText };
@@ -717,11 +974,30 @@ document.addEventListener("input", (e) => {
     debounce("seq", () => quietly(api(`/api/campaigns/${S.campaignId}`, { method: "PATCH", body: { sequence: seq } })));
   }
 });
+document.addEventListener("change", (e) => { if (e.target.id === "fileIn") { quietly(addFiles([...e.target.files])); e.target.value = ""; } });
+document.addEventListener("dragover", (e) => { const z = e.target.closest?.("#drop"); if (z) { e.preventDefault(); z.classList.add("over"); } });
+document.addEventListener("dragleave", (e) => { e.target.closest?.("#drop")?.classList.remove("over"); });
+document.addEventListener("drop", (e) => { const z = e.target.closest?.("#drop"); if (z) { e.preventDefault(); z.classList.remove("over"); quietly(addFiles([...e.dataTransfer.files])); } });
 document.addEventListener("submit", (e) => {
   e.preventDefault();
-  const f = Object.fromEntries(new FormData(e.target));
-  if (e.target.id === "loginForm") quietly(api("/auth/login", { method: "POST", body: f }).then(() => { $("#login").classList.add("hidden"); return boot(); }));
-  if (e.target.id === "nositeForm") quietly(createClient(f));
+  const f = Object.fromEntries(new FormData(e.target)), id = e.target.id;
+  if (id === "loginForm") quietly(api("/auth/login", { method: "POST", body: f }).then(() => { $("#login").classList.add("hidden"); return boot(); }));
+  if (id === "nositeForm") quietly(createClient(f));
+  if (id === "redoForm") quietly(redo(+e.target.dataset.i, f.note.trim()));
+  if (id === "pasteForm") quietly(saveInput(S.kind, f.filename.trim(), f.contentText));
+  if (id === "icpForm") quietly((async () => {
+    const I = icp();
+    S.profile = await api(`/api/clients/${S.clientId}/profile`, { method: "PATCH", body: { icp: { ...I, description: f.description,
+      icp: { ...(I.icp || {}), valueProp: f.valueProp, titles: list(f.titles), industries: list(f.industries), geographies: list(f.geographies), seedDomains: list(f.seedDomains) } } } });
+    S.editing = false; render();
+  })());
+  if (id === "angleForm") quietly((async () => {
+    const seg = { name: f.name.trim(), angle: "custom", icon: "⭐", sizeEstimate: "", desc: f.desc, pain: f.pain, criteria: list(f.criteria), examples: [],
+      valuePropCategory: "make money", targeting: { dataset: "saas", filters: {}, seedDomains: [], titles: list(f.titles) }, reachable: null };
+    if (segments().some((s) => s.name === seg.name)) return toast("An angle with that name already exists.");
+    S.profile = await api(`/api/clients/${S.clientId}/profile`, { method: "PATCH", body: { angles: { ...(S.profile.angles || {}), segments: [...segments(), seg] } } });
+    S.seg = segments().length - 1; S.target = null; $("#overlay").classList.add("hidden"); render();
+  })());
 });
 $("#bannerBtn").addEventListener("click", openApprove);
 $("#overlay").addEventListener("click", (e) => { if (e.target.id === "overlay") $("#overlay").classList.add("hidden"); });
@@ -733,7 +1009,7 @@ $("#play").addEventListener("click", () => {
   $("#play").textContent = S.auto ? "❚❚ Auto-playing" : "▶ Auto-play";
   if (!S.auto) clearTimeout(S.autoT);
   else if (!$("#landing").classList.contains("hidden")) typeUrl();
-  else if (S.clientId && !S.loading && !S.error && S.step < 6) quietly(approve(S.step));
+  else if (S.clientId && !S.loading && !S.error && S.step < N) quietly(approve(S.step));
   if (S.clientId) renderStage();
 });
 $("#speed").addEventListener("click", () => { S.speed = S.speed === 1 ? 2 : S.speed === 2 ? 4 : 1; $("#speed").textContent = S.speed + "×"; });

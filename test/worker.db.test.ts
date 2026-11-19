@@ -17,6 +17,8 @@ test("worker against Postgres", { skip: !url && "set TEST_DATABASE_URL" }, async
   await db.delete(schema.jobs).where(eq(schema.jobs.status, "queued"));
   const [client] = await db.insert(schema.clients).values({ slug: `w-${Date.now()}`, name: "W" }).returning();
   after(async () => { await db.delete(schema.clients).where(eq(schema.clients.id, client.id)); await pool.end(); });
+  // research is gated on intake (inputs first); approve it so research jobs can run here
+  await db.insert(schema.approvals).values({ clientId: client.id, stage: "intake", decision: "approved" });
   const enqueue = async (type = "research") => (await db.insert(schema.jobs).values({ clientId: client.id, type }).returning())[0];
   const until = async (id: string, status: string) => {
     for (let i = 0; i < 100; i++) {

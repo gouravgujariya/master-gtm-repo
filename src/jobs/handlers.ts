@@ -3,7 +3,7 @@
 // Strategy rules (fixed): bulk first · find AgenticData → AI Ark → ColdIQ · verify every email · DRAFT only.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import type { Ctx } from "../core/ctx.ts";
 import { AppError, MissingKeyError } from "../core/errors.ts";
 import type { JobType } from "../core/gates.ts";
@@ -13,6 +13,8 @@ import { findContact } from "../core/find.ts";
 import { verifyRows } from "../core/verify.ts";
 import { createDraft } from "../core/draft.ts";
 import { recheckCatchAll, searchCompanies, cleanDomain } from "../providers/ai-ark.ts";
+import { scrapeMarkdown } from "../providers/firecrawl.ts";
+import { countSegments } from "../providers/bulk.ts";
 import { config } from "../config.ts";
 import type { DB } from "../db/client.ts";
 import * as t from "../db/schema.ts";
@@ -32,9 +34,18 @@ export interface SourceInput {
   limit?: number;
 }
 
-/** Bulk first; lookalike is paid → needs allowPaid + reason (enforced by sourceCompanies). Skips used domains. */
-export async function sourceCore(ctx: Ctx, input: SourceInput, used: Set<string> = new Set(), dir = config().BULK_DIR) {
+/** Domains in a do-not-contact list: any domain or email per line / CSV cell. */
+export function parseDncDomains(text: string): string[] {
+  const out = new Set<string>();
+  for (const m of text.matchAll(/(?:[\w.+-]+@)?((?:[a-z0-9-]+\.)+[a-z]{2,})/gi)) out.add(cleanDomain(m[1]).toLowerCase());
+  return [...out].filter(Boolean);
+}
+
+/** Bulk first; lookalike is paid → needs allowPaid + reason (enforced by sourceCompanies).
+ *  `skip` = domain → why it must not be sourced (already used / DNC / competitor / the client itself); a Set means "already used". */
+export async function sourceCore(ctx: Ctx, input: SourceInput, skip: Set<string> | Map<string, string> = new Map(), dir = config().BULK_DIR) {
   const limit = input.limit ?? 25;
+  const used = skip instanceof Map ? new Map(skip) : new Map([...skip].map((d) => [d, "already used for this client"]));
   const paid = input.dataset === "lookalike"
     ? (c: Ctx) => { if (!input.seedDomains?.length) throw new AppError(400, "NO_SEEDS", "lookalike needs seedDomains"); return searchCompanies(c, input.seedDomains, limit + used.size); }
     : undefined;
@@ -43,12 +54,13 @@ export async function sourceCore(ctx: Ctx, input: SourceInput, used: Set<string>
     dataset: input.dataset === "local" ? "local" : "saas", filters: input.filters, limit: limit + used.size,
     dir, paid, allowPaid: input.allowPaid, reason: input.reason,
   });
-  const companies = [];
+  const companies = [], skipped: Record<string, number> = {};
   for (const r of rows) {
     const domain = cleanDomain(r.domain || "").toLowerCase();
     if (!domain) continue;
-    if (used.has(domain)) { ctx.log(`  - ${domain}: already used for this client — skipped`); continue; }
-    used.add(domain);
+    const why = used.get(domain);
+    if (why) { skipped[why] = (skipped[why] ?? 0) + 1; ctx.log(`  - ${domain}: ${why} — skipped`); continue; }
+    used.set(domain, "duplicate in this list");
     companies.push({
       companyName: r.company_name || "", domain, industry: r.industry || r.category || "",
       companySize: r.employees || r.size || "", location: r.location || [r.locality, r.country].filter(Boolean).join(", ") || r.zip || "",
@@ -57,7 +69,7 @@ export async function sourceCore(ctx: Ctx, input: SourceInput, used: Set<string>
     if (companies.length >= limit) break;
   }
   ctx.log(`✓ ${companies.length} companies (${input.dataset})`);
-  return { companies };
+  return { companies, skipped };
 }
 
 /** One decision-maker per company through the fixed waterfall; keeps find_source. */
@@ -79,6 +91,33 @@ export async function findCore(ctx: Ctx, companies: { domain: string; companyNam
   }
   ctx.log(`✓ ${contacts.length}/${companies.length} companies have a decision-maker`);
   return { contacts };
+}
+
+type QualifyRow = { domain: string; qualified: boolean | null; reason: string };
+/** AI qualification: scrape each homepage, one yes/no + reason per company. Unreachable site → null (never guessed).
+ *  scrape/judge are injectable so tests need no network or LLM. */
+export async function qualifyCore(
+  ctx: Ctx, companies: { domain: string; companyName?: string | null }[], criterion: string,
+  scrape = scrapeMarkdown, judge?: (c: Ctx, i: { criterion: string; companies: { domain: string; name?: string; site: string }[] }) => Promise<{ results: { domain: string; qualified: boolean; reason: string }[]; costUsd: number }>,
+) {
+  ctx.getKey("FIRECRAWL_API_KEY"); // fail fast (→ demo under auto) before paying for any scrape
+  if (!judge) { ctx.getKey("ANTHROPIC_API_KEY"); judge = (await agents()).runQualify; }
+  const results: QualifyRow[] = [], sites = [];
+  for (const c of companies) {
+    if (ctx.signal?.aborted) throw new Error("cancelled");
+    try {
+      const site = (await scrape(ctx, `https://${c.domain}`)).slice(0, 3000);
+      if (site.trim()) { sites.push({ domain: c.domain, name: c.companyName || "", site }); continue; }
+    } catch { /* unreachable below */ }
+    results.push({ domain: c.domain, qualified: null, reason: "site unreachable — check by hand" });
+    ctx.log(`  - ${c.domain}: site unreachable`);
+  }
+  ctx.log(`Asking: "${criterion}" for ${sites.length} companies…`);
+  const r = sites.length ? await judge(ctx, { criterion, companies: sites }) : { results: [], costUsd: 0 };
+  results.push(...r.results);
+  const counts = { qualified: results.filter((x) => x.qualified === true).length, rejected: results.filter((x) => x.qualified === false).length, unknown: results.filter((x) => x.qualified === null).length };
+  ctx.log(`✓ qualified ${counts.qualified} · rejected ${counts.rejected} · unknown ${counts.unknown}`);
+  return { results, counts, costUsd: r.costUsd };
 }
 
 /** OptimaVerifier gate + AI Ark catch-all cross-check. Rows are snake_case like the CLI CSVs. */
@@ -127,15 +166,21 @@ export const copyLeads = (copy: any): Map<string, any> =>
 
 const one = async <T>(q: PromiseLike<T[]>) => (await q)[0];
 const profile = (db: DB, clientId: string) => one(db.select().from(t.clientProfiles).where(eq(t.clientProfiles.clientId, clientId)));
+const INPUT_KINDS = ["questionnaire", "transcript", "case_study"] as const;
+/** The client's inputs (questionnaire + call transcripts + case studies) as labelled text for the LLM jobs. */
 const questionnaire = async (db: DB, clientId: string) =>
-  (await db.select({ c: t.files.contentText }).from(t.files).where(and(eq(t.files.clientId, clientId), eq(t.files.kind, "questionnaire")))).map((f) => f.c).filter(Boolean).join("\n\n") || undefined;
+  (await db.select({ k: t.files.kind, n: t.files.filename, c: t.files.contentText }).from(t.files)
+    .where(and(eq(t.files.clientId, clientId), inArray(t.files.kind, [...INPUT_KINDS]))).orderBy(t.files.createdAt))
+    .filter((f) => f.c).map((f) => `## ${f.k}: ${f.n}\n${f.c}`).join("\n\n") || undefined;
+const feedback = (job: Job) => ((job.input as any)?.feedback as string | undefined) || undefined;
+const segmentOf = (p: any, campaign: any) => (p?.angles?.segments ?? []).find((s: any) => s.name === campaign?.segment) ?? null;
 const needCampaign = (job: Job) => { if (!job.campaignId) throw new AppError(400, "NO_CAMPAIGN", `${job.type} needs a campaign`); return job.campaignId; };
 
-/** Contacts on this job's campaign, joined with their lead row. */
+/** Contacts on this job's campaign, joined with their lead row. Leads the operator excluded are left out. */
 function campaignContacts(db: DB, job: Job) {
   return db.select({ c: t.contacts, personalization: t.campaignLeads.personalization }).from(t.campaignLeads)
     .innerJoin(t.contacts, eq(t.contacts.id, t.campaignLeads.contactId))
-    .where(eq(t.campaignLeads.campaignId, needCampaign(job)));
+    .where(and(eq(t.campaignLeads.campaignId, needCampaign(job)), ne(t.campaignLeads.status, "excluded")));
 }
 
 const snake = (c: typeof t.contacts.$inferSelect): Row => ({
@@ -159,6 +204,15 @@ export const persist: Record<JobType, (db: DB, job: Job, r: Result) => Promise<v
   async segments(db, job, r) {
     const { demo, costUsd, ...angles } = r;
     await db.update(t.clientProfiles).set({ angles, updatedAt: new Date() }).where(eq(t.clientProfiles.clientId, job.clientId));
+  },
+  async offer(db, job, r) {
+    const { demo, costUsd, ...offer } = r;
+    await db.update(t.campaigns).set({ offer }).where(eq(t.campaigns.id, needCampaign(job)));
+  },
+  async qualify(db, job, r) {
+    const campaignId = needCampaign(job);
+    for (const x of r.results ?? []) await db.update(t.companies).set({ qualified: x.qualified, qualifyReason: x.reason })
+      .where(and(eq(t.companies.campaignId, campaignId), eq(t.companies.domain, String(x.domain).toLowerCase())));
   },
   async source(db, job, r) {
     if (!r.companies?.length) return;
@@ -221,23 +275,53 @@ const compute: Record<JobType, (ctx: Ctx, job: Job, db: DB) => Promise<Result>> 
     await db.insert(t.files).values({ clientId: job.clientId, kind: "research", filename, mime: "text/markdown", size: Buffer.byteLength(researchMd), storagePath: join(dir, filename) });
     await db.insert(t.clientProfiles).values({ clientId: job.clientId, contextMd: researchMd })
       .onConflictDoUpdate({ target: t.clientProfiles.clientId, set: { contextMd: researchMd, updatedAt: new Date() } });
-    const { costUsd, ...icp } = await (await agents()).runIcp(ctx, { website, researchMd, questionnaire: await questionnaire(db, job.clientId) });
+    const { costUsd, ...icp } = await (await agents()).runIcp(ctx, { website, researchMd, questionnaire: await questionnaire(db, job.clientId), feedback: feedback(job) });
     return { icp, costUsd };
   },
   async competitors(ctx, job, db) {
-    return (await agents()).runCompetitors(ctx, { icp: (await profile(db, job.clientId))?.icp as any });
+    return (await agents()).runCompetitors(ctx, { icp: (await profile(db, job.clientId))?.icp as any, feedback: feedback(job) });
   },
   async segments(ctx, job, db) {
     const icp: any = (await profile(db, job.clientId))?.icp;
-    return (await agents()).runSegments(ctx, { icp, competitors: { competitors: icp?.competitors, queries: icp?.queries } as any, questionnaire: await questionnaire(db, job.clientId) });
+    const r = await (await agents()).runSegments(ctx, { icp, competitors: { competitors: icp?.competitors, queries: icp?.queries } as any, questionnaire: await questionnaire(db, job.clientId), feedback: feedback(job) });
+    ctx.log("Counting reachable companies per segment in the bulk lists…");
+    const counts = await countSegments(config().BULK_DIR, r.segments.map((s) => s.targeting as any));
+    return { ...r, segments: r.segments.map((s, k) => ({ ...s, reachable: counts[k] })) };
+  },
+  async offer(ctx, job, db) {
+    const campaign = await one(db.select().from(t.campaigns).where(eq(t.campaigns.id, needCampaign(job))));
+    const p = await profile(db, job.clientId);
+    return (await agents()).runOffer(ctx, { icp: p?.icp as any, segment: segmentOf(p, campaign) ?? { name: campaign?.segment, angle: campaign?.angle }, intake: p?.offer, questionnaire: await questionnaire(db, job.clientId), feedback: feedback(job) });
   },
   async source(ctx, job, db) {
-    const used = await db.select({ d: t.companies.domain }).from(t.companies).where(eq(t.companies.clientId, job.clientId));
-    return sourceCore(ctx, (job.input ?? { dataset: "saas" }) as SourceInput, new Set(used.map((u) => u.d.toLowerCase())));
+    const [used, client, p, dnc] = await Promise.all([
+      db.select({ d: t.companies.domain }).from(t.companies).where(eq(t.companies.clientId, job.clientId)),
+      one(db.select().from(t.clients).where(eq(t.clients.id, job.clientId))),
+      profile(db, job.clientId),
+      db.select({ c: t.files.contentText }).from(t.files).where(and(eq(t.files.clientId, job.clientId), eq(t.files.kind, "dnc"))),
+    ]);
+    // later sets win: the most specific reason is shown
+    const skip = new Map<string, string>(used.map((u) => [u.d.toLowerCase(), "already used for this client"]));
+    for (const c of ((p?.icp as any)?.competitors ?? [])) { const d = cleanDomain(typeof c === "string" ? c : c.domain || "").toLowerCase(); if (d) skip.set(d, "competitor"); }
+    for (const f of dnc) for (const d of parseDncDomains(f.c || "")) skip.set(d, "do-not-contact list");
+    const own = cleanDomain(client?.website || "").toLowerCase();
+    if (own) skip.set(own, "the client itself");
+    return sourceCore(ctx, (job.input ?? { dataset: "saas" }) as SourceInput, skip);
+  },
+  async qualify(ctx, job, db) {
+    const campaign = await one(db.select().from(t.campaigns).where(eq(t.campaigns.id, needCampaign(job))));
+    const companies = await db.select().from(t.companies).where(eq(t.companies.campaignId, campaign!.id));
+    if (!companies.length) throw new AppError(400, "NO_COMPANIES", "No companies to qualify — run sourcing first");
+    const seg = segmentOf(await profile(db, job.clientId), campaign);
+    const criterion = (job.input as any)?.criterion?.trim()
+      || `Is this company a fit for the "${campaign!.segment || campaign!.name}" campaign${seg?.criteria?.length ? ` (${seg.criteria.join("; ")})` : ""}?`;
+    return qualifyCore(ctx, companies, criterion);
   },
   async find(ctx, job, db) {
     const campaign = await one(db.select().from(t.campaigns).where(eq(t.campaigns.id, needCampaign(job))));
-    const companies = await db.select().from(t.companies).where(eq(t.companies.campaignId, campaign!.id));
+    // qualify first: contacts are only found at companies that passed (or were overridden to pass)
+    const companies = await db.select().from(t.companies).where(and(eq(t.companies.campaignId, campaign!.id), eq(t.companies.qualified, true)));
+    if (!companies.length) throw new AppError(400, "NO_QUALIFIED", "No qualified companies — qualify (or override) some first");
     const titles = (job.input as any)?.titles ?? (campaign?.persona ? [campaign.persona] : undefined);
     return findCore(ctx, companies, titles);
   },
@@ -250,7 +334,10 @@ const compute: Record<JobType, (ctx: Ctx, job: Job, db: DB) => Promise<Result>> 
     const leads = (await campaignContacts(db, job)).filter(({ c }) => c.sendable).map(({ c }) => c);
     if (!leads.length) throw new AppError(400, "NO_SENDABLE_LEADS", "Copy is written only for verified (sendable) leads — none yet.");
     const campaign = await one(db.select().from(t.campaigns).where(eq(t.campaigns.id, needCampaign(job))));
-    return (await agents()).runCopy(ctx, { icp: (await profile(db, job.clientId))?.icp as any, campaign: campaign as any, leads: leads.map((c) => ({ email: c.email, firstName: c.firstName, lastName: c.lastName, title: c.title, companyName: c.companyName, companyDomain: c.companyDomain })), method: (job.input as any)?.method ?? "default" });
+    const p = await profile(db, job.clientId), intake: any = p?.offer ?? {};
+    // sender names + booking link come from the intake, so the copy never ships with "[Sender Name]"
+    const camp = { ...campaign, sender: { names: intake.senderNames || undefined, bookingLink: intake.bookingLink || undefined } };
+    return (await agents()).runCopy(ctx, { icp: p?.icp as any, campaign: camp as any, leads: leads.map((c) => ({ email: c.email, firstName: c.firstName, lastName: c.lastName, title: c.title, companyName: c.companyName, companyDomain: c.companyDomain })), method: (job.input as any)?.method ?? "default", offer: campaign?.offer as any, feedback: feedback(job) });
   },
   async draft(ctx, job, db) {
     const campaign = await one(db.select().from(t.campaigns).where(eq(t.campaigns.id, needCampaign(job))));

@@ -25,3 +25,8 @@ dist/
 
 # Local file storage (backend)
 data/
+
+# graphify output and demo media
+graphify-out/
+*.mp4
+demo/

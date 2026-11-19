@@ -14,16 +14,21 @@ should look and behave, and exactly which backend endpoints to call.
 
 ## 1. What the product is
 
-An internal console for **our team only** (no public signup). An operator enters a client's website, and
-the system works through a fixed outbound strategy in 6 steps. **A human approves every step before the
-next one can run.** At the end it creates a **DRAFT** campaign in Plusvibe, and a human clicks Start there.
+An internal console for **our team only** (no public signup). An operator enters a client's website and
+inputs, and the system works through a fixed outbound strategy in **9 steps in three tracks**: Strategy
+(inputs → research → competitors → angle → offer), Data (companies → qualify → contacts → emails), Launch
+(draft). **A human approves every step before the next one can run**, and can redo any step with feedback
+or look back at an approved one. At the end it creates a **DRAFT** campaign in Plusvibe, and a human clicks
+Start there. (The order follows the ScaleSprint workflow demo in `demo/`.)
 
 > "Get 1 to 3 hot leads in 24 hours." The client sees the result. The operator sees every step.
 
 ### Non-negotiable UX rules (these come from the GTM strategy, not taste)
-1. **Approve at every step.** Never auto-advance, except in demo auto-play (§7).
-2. **No sourcing before a campaign angle is approved.** The backend enforces this with `409 GATE`. The UI
-   should make the order obvious anyway.
+1. **Approve at every step.** Never auto-advance, except in demo auto-play (§7). Each approve button states
+   what approving asserts (the gate line), and every AI step has **Redo with feedback**.
+2. **Inputs first.** No research until the client's offer and at least one case study are in (`409
+   INTAKE_INCOMPLETE`). **No sourcing before the angle and its offer are approved**, and **no contacts before
+   companies are qualified**. The backend enforces all of this with `409 GATE`; the UI makes the order obvious.
 3. **Every email is verified.** Always show which leads are *sendable / held / dropped*. Never hide the
    held or dropped ones.
 4. **DRAFT only.** The final button says "Create draft in Plusvibe", never "Send" or "Launch". After
@@ -80,7 +85,8 @@ Without the proxy, call `http://localhost:3000` with `credentials: "include"` an
 | 422 | `LOOKUP_FAILED` | landing-page suggestion: "Couldn't read that site", but still allow continuing |
 | 402 | `LLM_BUDGET` | "Daily AI budget reached". Job error state |
 | 502 | `LLM_ERROR` / `LLM_BAD_OUTPUT` | job error state with a **Retry** button |
-| 400 | `NO_WEBSITE` `NO_CAMPAIGN` `NO_CONTACTS` `NO_SEEDS` `NO_SENDABLE_LEADS` | job error. Show `message`; the user fixes the input |
+| 409 | `INTAKE_INCOMPLETE` | intake approval refused: show `message` (what's missing) next to the checklist |
+| 400 | `NO_WEBSITE` `NO_CAMPAIGN` `NO_CONTACTS` `NO_SEEDS` `NO_SENDABLE_LEADS` `NO_COMPANIES` `NO_QUALIFIED` | job error. Show `message`; the user fixes the input |
 
 ### Endpoints
 
@@ -93,12 +99,18 @@ Without the proxy, call `http://localhost:3000` with `credentials: "include"` an
 | GET | `/api/lookup?url=` | → `{domain,name,description,favicon}` · 422 `LOOKUP_FAILED` |
 | GET | `/api/clients` | → `[{id,name,website,campaigns:[{id,name,status}]}]` (sidebar) |
 | POST | `/api/clients` | `{website}` **or** `{name, description?, questionnaire?}` → 201 client |
-| GET | `/api/clients/:id` | → `{client, profile, approvals, campaigns, latestJobs}` |
-| PATCH | `/api/clients/:id/profile` | `{icp?, angles?, contextMd?}` → profile ⚠ **revokes `icp` and every later approval** |
+| GET | `/api/clients/:id` | → `{client, profile, approvals, campaigns, latestJobs, files, intake}` |
+| PATCH | `/api/clients/:id/profile` | `{icp?, angles?, contextMd?}` → profile ⚠ an `icp`/`contextMd` edit **revokes `icp` and every later approval**; an `angles`-only edit (add your own angle) revokes nothing |
+| PATCH | `/api/clients/:id/intake` | `{offer?, pricing?, bookingLink?, senderNames?}` → `{offer, intake}` |
+| POST | `/api/clients/:id/files` | `{kind: "questionnaire"\|"transcript"\|"case_study"\|"dnc"\|"other", filename, contentText}` (≤200k chars) → 201 `{file, intake}` |
+| GET | `/api/clients/:id/files/:fileId` | → file with `contentText` |
+| DELETE | `/api/clients/:id/files/:fileId` | → `{ok, intake}` |
 | POST | `/api/clients/:id/campaigns` | `{name, angle, persona?, segment?, targeting?}` → 201 campaign |
 | GET | `/api/campaigns/:id` | → `{campaign, latestJobs, companies, contacts}` |
-| PATCH | `/api/campaigns/:id` | `{name?, sequence?}` → campaign |
-| PATCH | `/api/campaigns/:id/leads/:contactId` | `{personalization?, status?: "selected"\|"excluded"}` → lead |
+| PATCH | `/api/campaigns/:id` | `{name?, sequence?, offer?}` → campaign (an `offer` edit re-opens the `offer` gate and everything after it) |
+| PATCH | `/api/campaigns/:id/leads/:contactId` | `{personalization?, status?: "selected"\|"excluded"}` → lead (excluded leads are never verified, written for or drafted) |
+| PATCH | `/api/campaigns/:id/companies/:companyId` | `{qualified: boolean}` → company (manual override of the qualify verdict) |
+| GET | `/api/campaigns/:id/export?what=companies\|contacts` | → CSV download |
 | POST | `/api/jobs` | `{clientId, campaignId?, type, input?}` → 202 `{jobId}` · 409 `GATE` |
 | GET | `/api/jobs/:id` | → job |
 | GET | `/api/jobs/:id/events` | **SSE** live log + status (see below) |
@@ -132,15 +144,18 @@ the client and campaign** (the worker writes results into the DB) and render fro
 
 ## 4. The flow: steps ↔ jobs ↔ approvals
 
-| # | UI step | Level | Job(s) to run | Stage to approve | Renders from |
-|---|---|---|---|---|---|
-| 1 | Research your company | client | `research` `{website?}` | `icp` | `profile.icp` |
-| 2 | Explore competitors | client | `competitors` | `competitors` | `profile.icp.competitors`, `profile.icp.queries` |
-| 3 | Define campaigns | client → **creates the campaign** | `segments` | `strategy` (campaign) | `profile.angles.segments` |
-| 4 | Find potential customers | campaign | `source` (input from the targeting form) | `companies` | `campaign.companies` |
-| 5 | Find decision makers | campaign | `find` `{titles}` | `contacts` | `campaign.contacts` |
-| 6 | Write emails | campaign | `verify`, **then** `copy` `{method}` | `copy` | contacts + `campaign.sequence` |
-| ✓ | Outreach ready | campaign | `draft` via `POST /api/campaigns/:id/draft` | (`send`, automatic) | draft result |
+| # | Track | UI step | Level | Job(s) to run | Stage to approve | Renders from |
+|---|---|---|---|---|---|---|
+| 1 | Strategy | Client inputs | client | none (files + offer facts) | `intake` | `intake`, `files`, `profile.offer` |
+| 2 | | Research company | client | `research` `{website?, feedback?}` | `icp` | `profile.icp` |
+| 3 | | Competitors | client | `competitors` `{feedback?}` | `competitors` | `profile.icp.competitors`, `profile.icp.queries` |
+| 4 | | Campaign angle | client → **creates the campaign** | `segments` `{feedback?}` | `strategy` (campaign) | `profile.angles.segments` (+ `reachable`) |
+| 5 | | Front-end offer | campaign | `offer` `{feedback?}` | `offer` | `campaign.offer` |
+| 6 | Data | Find companies | campaign | `source` (input from the targeting form) | `companies` | `campaign.companies`, `latestJobs.source.result.skipped` |
+| 7 | | Qualify companies | campaign | `qualify` `{criterion?}` | `qualified` | `campaign.companies[].qualified/qualifyReason` |
+| 8 | | Decision makers | campaign | `find` `{titles}` (qualified companies only) | `contacts` | `campaign.contacts` |
+| 9 | | Verify & write emails | campaign | `verify`, **then** `copy` `{method, feedback?}` | `copy` | contacts + `campaign.sequence` |
+| ✓ | Launch | Draft ready | campaign | `draft` via `POST /api/campaigns/:id/draft` | (`send`, automatic) | draft result |
 
 **The step state machine** (same for every step):
 1. Find the latest job of the step's type: client steps use `client.latestJobs[type]`; campaign steps use
@@ -152,19 +167,34 @@ the client and campaign** (the worker writes results into the DB) and render fro
 4. **Resume:** after login or reload, the current step = the first stage that isn't approved. Keep
    `clientId`/`campaignId` in the URL (e.g. `/c/:clientId/k/:campaignId`) so a reload restores it.
 
-**Going back:** the operator may revisit and edit an earlier step. Editing the profile, or re-approving an earlier
-stage, makes the backend **revoke every later approval**. Show those steps as "needs re-approval",
-not as broken.
+**Redo with feedback:** every AI step has a Redo button. It records `POST /api/approvals {decision:"rejected",
+note}` (audit trail) and re-runs the step's job with `input.feedback = note`; the prompt receives it as
+`<operator_feedback>`. Non-AI steps re-run directly ("+ Source more", "Re-run finder"); qualify re-runs with an
+edited question (`input.criterion`).
+
+**Going back:** clicking a done step in the stepper or sidebar shows it read-only with "Back to current step"
+and "Re-open & redo". Editing the profile or an approved offer, or re-approving an earlier stage, makes the
+backend **revoke every later approval**. Show those steps as "needs re-approval", not as broken.
 
 ### Step details
 
-**Step 1 — Research.** A company card: name, domain, description, founded, employees, geo, keyword chips,
-product title + 3 points (`Icp` schema). A "Details look off?" link edits the description through `PATCH profile`
-(warn that this resets later approvals).
+**Step 1 — Client inputs (intake gate).** A checklist (offer & pricing required, case studies required,
+questionnaire, call transcripts, booking link, sender names, do-not-contact list) beside an offer form
+(`PATCH intake`, autosaved) and a drop zone / paste box for `.md/.txt/.csv` files with a kind picker
+(`POST files`; the browser reads the file as text, and PDFs/Word files are pasted as text). Approve stays
+disabled with "Missing: …" until `intake.missing` is empty. Inputs feed research, segments, offer and copy;
+DNC files and competitors are skipped at sourcing; sender names + booking link go into the copy.
 
-**Step 2 — Competitors.** 3 search queries + up to 15 competitor cards `{domain, name, why}`.
+**Step 2 — Research.** A company card: name, domain, description, founded, employees, geo, keyword chips,
+product title + 3 points (`Icp` schema). "Edit the profile" opens an inline form (description, value prop,
+titles, industries, geographies, seed domains) → `PATCH profile` (resets later approvals).
 
-**Step 3 — Campaigns.** 6 segment cards, one selectable: `name, icon, sizeEstimate, desc, pain,
+**Step 3 — Competitors.** 3 search queries + up to 15 competitor cards `{domain, name, why}`.
+
+**Step 4 — Campaign angle.** Each card shows the **reachable** count from the bulk lists
+(`segment.reachable`; `null` → the AI's `~sizeEstimate`) as a badge: under 5k **thin**, 5k–50k **ideal**,
+50k–200k plain, over 200k **split it**. A dashed "+ Add your own angle" card adds a `custom` segment
+(`PATCH profile {angles}`) for the client's own strategy. 6 segment cards, one selectable: `name, icon, sizeEstimate, desc, pain,
 criteria[], examples[], angle, valuePropCategory`. Under the selected card, a **targeting form**
 pre-filled from `segment.targeting`:
 - `dataset`: `saas` | `local` | `lookalike` (`none` → default to saas)
@@ -177,14 +207,23 @@ has no campaign yet), then `POST /api/approvals {stage:"strategy", campaignId}`.
 `campaign.targeting` restores the form after a reload.
 Angles `new-hire, hiring, competitor-engagers, tech-stack` aren't automated (`409 NOT_WIRED`). Mark them "manual".
 
-**Step 4 — Companies.** `source` input =
-`{dataset, filters:{...}, seedDomains?, limit, allowPaid?:true, reason?}`. A table with columns company (name + domain),
-industry, location, size, and a source chip (`listSource`).
+**Step 5 — Front-end offer (founder gate).** Editable headline, offer, proof points (one per line, only from
+case studies), CTA, risk reversal → `PATCH campaign {offer}` (debounced). Approve reads "Founder signs off the
+offer". Copy is built on the approved offer.
 
-**Step 5 — Decision makers.** `find` input = `{titles:[...]}`. A table with columns avatar initials + name +
+**Step 6 — Companies.** `source` input =
+`{dataset, filters:{...}, seedDomains?, limit, allowPaid?:true, reason?}`. "Skipped N: x do-not-contact list ·
+y competitor · z already used" from `result.skipped`. A table with columns company (name + domain),
+industry, location, size, and a source chip (`listSource`). ⬇ CSV export.
+
+**Step 7 — Qualify.** The yes/no question (editable; "Re-run with this question" → `qualify {criterion}`),
+counts (qualified / rejected / unchecked = site unreachable), and a table company · verdict badge · reason.
+Clicking a verdict toggles it (`PATCH companies/:id`). Approve is refused with 0 qualified.
+
+**Step 8 — Decision makers.** `find` input = `{titles:[...]}`. A table with columns avatar initials + name +
 LinkedIn link, title, company, and a "found by" chip from `findSource`.
 
-**Step 6 — Emails.** Runs `verify`, then `copy` (method picker: `default` | `braun`). Left: the list of people
+**Step 9 — Emails.** Filter chips All / Sendable / Held / Dropped / Excluded above the list. Runs `verify`, then `copy` (method picker: `default` | `braun`). Left: the list of people
 with **finder chips** (AgenticData → AI Ark → ColdIQ waterfall; highlight the one in `findSource`) and a
 **verdict badge**:
 
@@ -202,11 +241,12 @@ Show `verifyNote` as a tooltip. Right: the **email editor** for the selected per
 - Follow-ups = `campaign.sequence.sequence.slice(1)` (`{step, waitDays, body}`, **shared**, editable)
 - Saving (debounce ~600ms): body → `PATCH /api/campaigns/:id/leads/:contactId {personalization:{...p, body}}`;
   subject/follow-ups → `PATCH /api/campaigns/:id {sequence}`
-- Not sendable → show "excluded from draft". Optional per-lead "exclude" → `PATCH lead {status:"excluded"}`.
+- Not sendable → show "excluded from draft". "Exclude from draft" / "Include in draft" toggle →
+  `PATCH lead {status}`; excluded cards are dimmed and never drafted.
 
 **Final — Outreach ready.** Tabs Companies / People / Emails, a "What happens next" strip (7 Launch in
 Plusvibe · 8 Replies land in the inbox · 9 Book meetings), and the **Create draft** modal:
-- counts from `campaign.latestJobs.verify.result.counts` → "**11** verified will be drafted · **3** held · **1** dropped"
+- counts from the contacts (`sendable` / `emailStatus` / `leadStatus`) → "**11** verified will be drafted · **3** held · **1** invalid · 1 excluded by you"
 - rules text: "Only verified emails are uploaded. Campaign is created as DRAFT."
 - button "Create draft in Plusvibe" → `POST /api/campaigns/:id/draft` → stream the log inside the modal →
   show `result.externalCampaignId`, `result.uploaded`, and *"Draft created — a human must click Start in Plusvibe."*
@@ -227,14 +267,14 @@ Plusvibe · 8 Replies land in the inbox · 9 Book meetings), and the **Create dr
 │  "I don't have a website" → form: name, description, questionnaire      │
 └──────────────────────────────────────────────────────────────────────────┘
 ┌───────────────┬──────────────────────────────────────────────────────────┐
-│ SIDEBAR 280px │ Banner (step ≥ 4): "Your campaign is almost ready…"      │
-│ • Client name │ Stepper: ① Research ② Competitors ③ Campaigns            │
-│ • Step summary│          ④ Companies ⑤ People ⑥ Emails                  │
+│ SIDEBAR 280px │ Banner (draft ready): "Your campaign is almost ready…"   │
+│ • Client name │ Stepper: STRATEGY ①–⑤ · DATA ⑥–⑨ · LAUNCH ⑩              │
+│ • Step summary│          (done dots open that step read-only)            │
 │   (✓ approved,│ ┌──────────────────────────────────────────────────────┐ │
 │    ● current, │ │ Step content (cards / table / editor)                │ │
 │    ○ locked)  │ │ [DEMO DATA] badge if result.demo                     │ │
 │ • Campaigns   │ │                                                      │ │
-│   list        │ │                         [ Approve <stage> → ]        │ │
+│   list        │ │                       [Redo] [Approve <stage> →]       │ │
 │ • Agent log   │ └──────────────────────────────────────────────────────┘ │
 │   (live SSE,  │ Loading state: spinner + "Agent is working…" + last log  │
 │    mono font) │ Error state: message + [Retry]                           │
@@ -278,7 +318,8 @@ Allow **Cancel** on long jobs (`POST /api/jobs/:id/cancel`).
 ## 8. Visual design
 
 Calm, light and editorial: white cards on a warm off-white background, black ink, green only for success and sendable.
-The prototype's look is the reference (it follows the demo video the client liked).
+The prototype's look is the reference (it follows the demo video the client liked). No invented numbers on
+the landing page: it states how campaigns are run, not made-up results.
 
 ```css
 :root{
@@ -312,7 +353,11 @@ Hooks: `useMe()`, `useClient(id)`, `useCampaign(id)`, `useJobStream(jobId)`, `us
 ## 10. Done checklist (acceptance)
 - [ ] Logged out → login; after login, reload keeps the session and the URL restores the client/campaign + step.
 - [ ] The website lookup suggestion appears; a 422 still lets the user continue.
+- [ ] New client opens on Client inputs; Approve stays disabled until an offer and a case study are in.
 - [ ] Every step: job auto-starts → live log streams → result renders → Approve → next step unlocks.
+- [ ] Redo with feedback re-runs the step with the note; a done step can be viewed read-only and re-opened.
+- [ ] Qualify shows a reason per company and overrides persist; contacts are found only at qualified ones.
+- [ ] An excluded lead is not drafted; CSV exports download.
 - [ ] Skipping ahead is impossible in the UI, and a `409 GATE` from the API shows "Approve X first".
 - [ ] Editing step 1 or re-approving an earlier step shows later steps as "needs re-approval".
 - [ ] Lookalike sourcing can't start without a reason.
