@@ -39,6 +39,7 @@ Global provider keys (`FIRECRAWL_API_KEY`, `ADATA_API_KEY`, `AI_ARK_API_KEY`, `C
 | POST | `/auth/login` | `{email,password}` → `{user:{id,email,role}}` + `sid` cookie |
 | POST | `/auth/logout` | → `{ok:true}` |
 | GET | `/auth/me` | → `{user, demoMode}` (401 if none) |
+| POST | `/auth/demo` | Only with `DEMO_MODE=on` and not in production: signs in the shared `demo@demo.local` user → `{user}` + `sid` cookie. 404 otherwise |
 | GET | `/api/lookup?url=` | → `{domain,name,description,favicon}` (homepage `<title>`/meta, 5s timeout, no key) |
 | GET | `/api/clients` | → `[{id,name,website,campaigns:[{id,name,status}]}]` |
 | POST | `/api/clients` | `{website}` or `{name,description?,questionnaire?}` → client |

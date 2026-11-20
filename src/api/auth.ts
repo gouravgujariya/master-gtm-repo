@@ -97,5 +97,18 @@ export function authRoutes(lookup: SessionLookup) {
       deleteCookie(c, "sid", cookieOpts());
       return c.json({ ok: true });
     })
+    // Demo only: sign in a shared demo user so the console opens without credentials.
+    // Off in production and unless DEMO_MODE=on, so it can't become a back door.
+    .post("/demo", async (c) => {
+      const cfg = config();
+      if (cfg.DEMO_MODE !== "on" || cfg.NODE_ENV === "production") throw new AppError(404, "NOT_FOUND", "No route POST /auth/demo");
+      const passHash = await hashPassword(randomBytes(24).toString("hex")); // unusable password: demo user can't log in by form
+      const [u] = await db.insert(users).values({ email: "demo@demo.local", passHash, role: "operator" })
+        .onConflictDoUpdate({ target: users.email, set: { disabledAt: null } })
+        .returning({ id: users.id, email: users.email, role: users.role });
+      const [s] = await db.insert(sessions).values({ userId: u.id, expiresAt: new Date(Date.now() + SESSION_MS) }).returning();
+      setCookie(c, "sid", s.id, cookieOpts());
+      return c.json({ user: u });
+    })
     .get("/me", requireAuth(lookup), (c) => c.json({ user: c.get("user"), demoMode: config().DEMO_MODE }));
 }

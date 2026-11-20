@@ -62,6 +62,9 @@ Without the proxy, call `http://localhost:3000` with `credentials: "include"` an
 `CORS_ORIGIN` must list the UI domain.
 
 **First login:** `npm run user:add -- --email=you@x.com --password=... --role=admin` (in the backend repo).
+With `DEMO_MODE=on` you need no user: on a 401 from `/auth/me` the page calls `POST /auth/demo` before it shows the login form.
+
+**Separate repo:** the UI also lives in [gtm_frontend](https://github.com/gouravgujariya/gtm_frontend), which serves it on :5173 with `config.js` (`window.GTM_API`) pointing at the API.
 
 ---
 

@@ -267,7 +267,7 @@ tr.no td{color:var(--faint)}
 <script>
 /* ===================== API layer (contract: docs/backend-contract.md) ===================== */
 const API = window.GTM_API || "";
-async function api(path, { method = "GET", body, quiet } = {}) {
+async function api(path, { method = "GET", body, quiet, noLogin } = {}) {
   let r, data;
   try {
     r = await fetch(API + path, { method, credentials: "include", headers: body ? { "content-type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined });
@@ -275,7 +275,7 @@ async function api(path, { method = "GET", body, quiet } = {}) {
   } catch (e) { if (!quiet) toast("Network error — is the API running?"); throw e; }
   if (r.ok) return data;
   const err = Object.assign(new Error(data.error?.message || `${r.status} ${r.statusText}`), { status: r.status, code: data.error?.code, needs: data.error?.needs });
-  if (r.status === 401 && path !== "/auth/login") showLogin();
+  if (r.status === 401 && path !== "/auth/login" && !noLogin) showLogin();
   else if (!quiet) toast(err.message + (err.needs ? ` (approve “${err.needs}” first)` : ""));
   throw err;
 }
@@ -395,7 +395,12 @@ function sourceInput(T) {
 
 /* ===================== Auth + boot ===================== */
 async function boot() {
-  const me = await api("/auth/me", { quiet: true }); // 401 → login overlay
+  // 401 → try the demo sign-in (server allows it only with DEMO_MODE=on), else the login overlay
+  const me = await api("/auth/me", { quiet: true, noLogin: true }).catch(async (e) => {
+    if (e.status !== 401) throw e;
+    await api("/auth/demo", { method: "POST", quiet: true, noLogin: true }).catch(() => { showLogin(); throw e; });
+    return api("/auth/me", { quiet: true });
+  });
   S.user = me.user; S.demoMode = me.demoMode;
   $("#demo").classList.toggle("hidden", me.demoMode !== "on");
   await loadClients();
