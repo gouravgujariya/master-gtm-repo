@@ -45,6 +45,7 @@ Global provider keys (`FIRECRAWL_API_KEY`, `ADATA_API_KEY`, `AI_ARK_API_KEY`, `C
 | POST | `/api/clients` | `{website}` or `{name,description?,questionnaire?}` → client |
 | GET | `/api/clients/:id` | → `{client,profile,approvals,campaigns,latestJobs:{[type]:job},files:[{id,kind,filename,size,createdAt}],intake}` |
 | PATCH | `/api/clients/:id/profile` | `{icp?,angles?,contextMd?}` → profile; an `icp`/`contextMd` edit revokes `icp` + later stages, an `angles`-only edit revokes nothing |
+| DELETE | `/api/clients/:id` | Archive (soft delete): hidden from `GET /api/clients`, data kept → `{ok:true}` |
 | PATCH | `/api/clients/:id/intake` | `{offer?,pricing?,bookingLink?,senderNames?}` (merged into `client_profiles.offer`) → `{offer,intake}` |
 | POST | `/api/clients/:id/files` | `{kind:questionnaire\|transcript\|case_study\|dnc\|other, filename, contentText≤200k}` → 201 `{file,intake}` |
 | GET / DELETE | `/api/clients/:id/files/:fileId` | → file incl. `contentText` / → `{ok,intake}` |

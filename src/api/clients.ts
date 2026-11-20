@@ -102,6 +102,12 @@ export const clientRoutes = new Hono<Env>()
     });
     return c.json(profile);
   })
+  // Archive = soft delete: the client leaves the list, its data stays (archived_at can be cleared in SQL).
+  .delete("/:id", async (c) => {
+    const client = await getClient(uuidParam(c, "id"));
+    await db.update(clients).set({ archivedAt: new Date() }).where(eq(clients.id, client.id));
+    return c.json({ ok: true });
+  })
   .patch("/:id/intake", async (c) => {
     const client = await getClient(uuidParam(c, "id"));
     const b = await body(c, Intake);
