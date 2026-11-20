@@ -8,6 +8,8 @@ import { MissingKeyError } from "../core/errors.ts";
 import type { JobType } from "../core/gates.ts";
 import type { DB } from "../db/client.ts";
 import { config } from "../config.ts";
+import { eq } from "drizzle-orm";
+import { clientProfiles } from "../db/schema.ts";
 import { handlers, persist, type Job, type Result } from "./handlers.ts";
 
 export const FIXTURE = resolve(import.meta.dirname, "../../fixtures/demo/scriptlens.json");
@@ -38,9 +40,16 @@ export async function runDemo(ctx: Ctx, job: Job, db: DB, o: RunOpts = {}): Prom
   const result = fx.results[type];
   if (!result) throw new Error(`Demo fixture has no result for "${type}"`);
   for (const line of fx.logs?.[type] ?? []) { await nap(o.stepMs ?? 300, ctx.signal); ctx.log(line); }
-  const r = { ...result, demo: true, ...(type === "draft" ? { externalCampaignId: `DEMO-${job.id.slice(0, 8)}` } : {}) };
+  const r = { ...(type === "copy" ? await withSender(db, job, result) : result), demo: true, ...(type === "draft" ? { externalCampaignId: `DEMO-${job.id.slice(0, 8)}` } : {}) };
   await (o.save ?? persist)[type](db, job, r);
   return r;
+}
+
+// Live copy signs with the intake's sender names; the replayed copy does too, so the demo never shows "[Sender Name]".
+async function withSender(db: DB, job: Job, result: Result): Promise<Result> {
+  const [p] = await db.select({ offer: clientProfiles.offer }).from(clientProfiles).where(eq(clientProfiles.clientId, job.clientId));
+  const name = String((p?.offer as { senderNames?: string } | null)?.senderNames || "").split(",")[0].trim();
+  return name ? JSON.parse(JSON.stringify(result).replaceAll("[Sender Name]", JSON.stringify(name).slice(1, -1))) : result;
 }
 
 export async function runJob(ctx: Ctx, job: Job, db: DB, o: RunOpts = {}): Promise<Result> {
